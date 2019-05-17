@@ -3,20 +3,18 @@
  * Implementation of Node class.
  *
  * @author Haohang Huang
- * @date Feburary 4, 2018
+ * @date May 16, 2019
  */
 
 #include "Node.h"
 
 using namespace Eigen;
 
-Node::Node()
-{
-}
+Node::Node() {}
 
-Node::Node(const int & index, const double & x, const double & y)
-  : index_(index), globalCoord_(x,y), disp_(0,0), strain_(VectorXd::Zero(4)),
-    stress_(VectorXd::Zero(4)), averageCount_(0)
+Node::Node(const int & index, const double & x, const double & y, const double & z)
+  : index_(index), globalCoord_(x,y,z), disp_(0,0,0), strain_(VectorXd::Zero(6)),
+    stress_(VectorXd::Zero(6)), averageCount_(0)
 { // All using initializer list
 }
 
@@ -54,19 +52,19 @@ void Node::copy_(Node const & other)
     averageCount_ = other.averageCount_;
 }
 
-void Node::setGlobalCoord(const double & x, const double & y)
+void Node::setGlobalCoord(const double & x, const double & y, const double & z)
 {
-    globalCoord_ << x, y;
+    globalCoord_ << x, y, z;
 }
 
-void Node::setDisp(const double & u, const double & v)
+void Node::setDisp(const double & u, const double & v, const double & w)
 {
-    disp_ << u, v;
+    disp_ << u, v, w;
 }
 
-void Node::setForce(const double & Fx, const double & Fy)
+void Node::setForce(const double & Fx, const double & Fy, const double & Fz)
 {
-    force_ << Fx, Fy;
+    force_ << Fx, Fy, Fz;
 }
 
 void Node::setStrainAndStress(const VectorXd & strain, const VectorXd & stress)
@@ -91,17 +89,17 @@ const int & Node::getIndex() const
     return index_;
 }
 
-const Vector2d & Node::getGlobalCoord() const
+const Vector3d & Node::getGlobalCoord() const
 {
     return globalCoord_;
 }
 
-const Vector2d & Node::getDisp() const
+const Vector3d & Node::getDisp() const
 {
     return disp_;
 }
 
-const Vector2d & Node::getForce() const
+const Vector3d & Node::getForce() const
 {
     return force_;
 }

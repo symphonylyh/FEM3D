@@ -1,15 +1,15 @@
 /**
- * @file ShapeQ8.cpp
- * Implementation of ShapeQ8 class.
+ * @file ShapeB20.cpp
+ * Implementation of ShapeB20 class.
  *
  * @author Haohang Huang
- * @date Feburary 13, 2018
+ * @date May 16, 2019
  */
 
-#include "ShapeQ8.h"
+#include "ShapeB20.h"
 #include <cmath>
 
-ShapeQ8::ShapeQ8(const int & nodes, const int & gaussians, const int & edges, const int & edgeNodes, const int & edgeGaussians) :
+ShapeB20::ShapeB20(const int & nodes, const int & gaussians, const int & edges, const int & edgeNodes, const int & edgeGaussians) :
     Shape(nodes, gaussians, edges, edgeNodes, edgeGaussians) // Call the constructor of base class
 {
     // Set up shape parameters
@@ -83,11 +83,11 @@ ShapeQ8::ShapeQ8(const int & nodes, const int & gaussians, const int & edges, co
 
 }
 
-ShapeQ8::~ShapeQ8()
+ShapeB20::~ShapeB20()
 {
 }
 
-VectorXd ShapeQ8::functionVec(const Vector2d & point) const
+VectorXd ShapeB20::functionVec(const Vector2d & point) const
 { // 8x1 Vector
     VectorXd result(numNodes_);
     double Ni = 0;
@@ -110,7 +110,7 @@ VectorXd ShapeQ8::functionVec(const Vector2d & point) const
     return result;
 }
 
-MatrixXd ShapeQ8::functionMat(const Vector2d & point) const
+MatrixXd ShapeB20::functionMat(const Vector2d & point) const
 { // 2x16 matrix
     MatrixXd result = MatrixXd::Zero(2, 2 * numNodes_); // 2-D, 8-Node
     double Ni = 0;
@@ -133,7 +133,7 @@ MatrixXd ShapeQ8::functionMat(const Vector2d & point) const
     return result;
 }
 
-MatrixXd ShapeQ8::functionDeriv(const Vector2d & point) const
+MatrixXd ShapeB20::functionDeriv(const Vector2d & point) const
 { // 2x8 matrix
     MatrixXd result(2, numNodes_);
     for (int i = 0; i < numNodes_; i++) {
@@ -159,7 +159,7 @@ MatrixXd ShapeQ8::functionDeriv(const Vector2d & point) const
     return result;
 }
 
-VectorXd ShapeQ8::edgeFunctionVec(const double & point) const
+VectorXd ShapeB20::edgeFunctionVec(const double & point) const
 { // 3x1 vector
     VectorXd result(numEdgeNodes_);
     double Ni = 0;
@@ -175,7 +175,7 @@ VectorXd ShapeQ8::edgeFunctionVec(const double & point) const
     return result;
 }
 
-MatrixXd ShapeQ8::edgeFunctionMat(const double & point) const
+MatrixXd ShapeB20::edgeFunctionMat(const double & point) const
 { // 2x6 matrix, 3 gaussian point and 3 node at each edge
     MatrixXd result = MatrixXd::Zero(2, 2 * numEdgeNodes_);
     double Ni = 0;
@@ -192,7 +192,7 @@ MatrixXd ShapeQ8::edgeFunctionMat(const double & point) const
     return result;
 }
 
-VectorXd ShapeQ8::edgeFunctionDeriv(const double & point) const
+VectorXd ShapeB20::edgeFunctionDeriv(const double & point) const
 { // 3x1 vector
     VectorXd result(numEdgeNodes_);
     double Ni = 0;

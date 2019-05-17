@@ -3,8 +3,7 @@
  * Node class for the basic coordinates and mechanical properties.
  *
  * @author Haohang Huang
- * @date Feburary 4, 2018
- * @note Efficiency optimized by pass/return-by-ref on March 26, 2018
+ * @date May 16, 2019
  */
 
 #ifndef Node_h
@@ -30,6 +29,7 @@ class Node
          * @param index The index number of current node.
          * @param x The global x-coordinate of the node.
          * @param y The global y-coordinate of the node.
+         * @param z The global z-coordinate of the node.
          * @note All pass-by-ref.
          */
         Node(const int & index, const double & x, const double & y);
@@ -50,37 +50,40 @@ class Node
         ~Node();
 
         /**
-         * Assign the initial global coordinates (r,z) of the node.
+         * Assign the initial global coordinates (x,y,z) of the node.
          *
          * @param x The global x-coordinate of the node.
          * @param y The global y-coordinate of the node.
+         * @param z The global z-coordinate of the node.
          */
-        void setGlobalCoord(const double & x, const double & y);
+        void setGlobalCoord(const double & x, const double & y, const double & z);
 
         /**
-         * Assign the final solved displacements (u,v) at the node.
+         * Assign the final solved displacements (u,v,w) at the node.
          *
          * @param u The x-displacement at the node.
          * @param v The y-displacement at the node.
+         * @param w The z-displacement at the node.
          */
-        void setDisp(const double & u, const double & v);
+        void setDisp(const double & u, const double & v, const double & w);
 
         /**
-         * Assign the final solved force (Fx, Fy) at the node.
+         * Assign the final solved force (Fx, Fy, Fz) at the node.
          *
          * @param Fx The x-force applied the node.
          * @param Fy The y-force applied the node.
+         * @param Fz The z-force applied the node.
          */
-        void setForce(const double & Fx, const double & Fy);
+        void setForce(const double & Fx, const double & Fy, const double & Fz);
 
         /**
          * Cumulate the stress and strain values at this node by summing up
          * the values from each adjacent element.
          *
          * @param strain The strain vector to be added to this node. The form is:
-         * [e(r), e(theta), e(z), gamma(rz)].
+         * [e(x), e(y), e(z), gamma(xy), gamma(yz), gamma(zx))].
          * @param stress The stress vector to be added to this node. The form is:
-         * [s(r), s(theta), s(z), t(rz)].
+         * [s(x), s(y), s(z), t(xy), t(yz), t(zx)].
          *
          * @note This is an internal step for computing the averaged strain and
          * stress at each node. The cumulative value will be averaged later.
@@ -112,43 +115,43 @@ class Node
         const int & getIndex() const;
 
         /**
-         * Get the initial global coordinates (r,z) of the node.
+         * Get the initial global coordinates (x,y,z) of the node.
          *
          * @return The global coordinates.
          */
-        const Vector2d & getGlobalCoord() const;
+        const Vector3d & getGlobalCoord() const;
 
         /**
-         * Get the solved displacements (u,v) at the node.
+         * Get the solved displacements (u,v,w) at the node.
          *
          * @return The displacements.
          */
-        const Vector2d & getDisp() const;
+        const Vector3d & getDisp() const;
 
         /**
-         * Get the solved force (Fx, Fy) at the node.
+         * Get the solved force (Fx, Fy, Fz) at the node.
          *
          * @return The forces.
          */
-        const Vector2d & getForce() const;
+        const Vector3d & getForce() const;
 
     private:
         /** Zero-based index of the node */
         int index_;
 
-        /** Global coordinates (r,z) */
-        Vector2d globalCoord_;
+        /** Global coordinates (x,y,z) */
+        Vector3d globalCoord_;
 
-        /** Displacements (u,v) */
-        Vector2d disp_;
+        /** Displacements (u,v,w) */
+        Vector3d disp_;
 
-        /** Forces (Fx,Fy) */
-        Vector2d force_;
+        /** Forces (Fx,Fy,Fz) */
+        Vector3d force_;
 
-        /** Strain vector [e(r), e(theta), e(z), gamma(rz)] */
+        /** Strain vector [e(x), e(y), e(z), gamma(xy), gamma(yz), gamma(zx))] */
         VectorXd strain_;
 
-        /** Strain vector [s(r), s(theta), s(z), t(rz)] */
+        /** Strain vector [s(x), s(y), s(z), t(xy), t(yz), t(zx)] */
         VectorXd stress_;
 
         /** Number of adjacent elements at this node */

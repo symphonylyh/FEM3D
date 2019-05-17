@@ -16,6 +16,11 @@
 #include "BackAnalysis.h"
 // #include "IO.h" //#include "Matrix/src/Core/IO.h" // to change the folder name, you can just change in Node.h and Shape.h into "include Matrix/Eigen"
 
+// 2D-->3D notes:
+// 1. Vector2d to Vector3d, VectorXd should be treated carefully in the initializer list
+// 2. stress & strain tensor dimension 4-->6
+// 3. More input parameters for constructor
+
 int main(int argc, char const *argv[]) {
     //IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
     /* Test Node.h and Mesh.h
@@ -177,23 +182,23 @@ auto start = std::chrono::high_resolution_clock::now();
     // case1->writeToFile(outFileName);
     // case1->writeToVTK(outVTKName);
 
-    for (int i = 1; i < argc; i++) {
-        std::string inFileName(argv[i]);
-        Mesh mesh = Mesh(inFileName); // on stack, make sure lifetime of 'mesh' is longer than Analysis case
-        Analysis* caseType; // 'case' is a reserved keyword for switch()
-        if (mesh.nonlinear)
-            caseType = new Nonlinear(mesh);
-        else
-            caseType = new Linear(mesh);
-
-        caseType->solve();
-        // caseType->printDisp();
-        // caseType->printStrain();
-        // caseType->printStress();
-        // caseType->writeToFile(outFileName);
-        // caseType->writeToVTK(outVTKName);
-        delete caseType; caseType = NULL;
-    }
+//    for (int i = 1; i < argc; i++) {
+//        std::string inFileName(argv[i]);
+//        Mesh mesh = Mesh(inFileName); // on stack, make sure lifetime of 'mesh' is longer than Analysis case
+//        Analysis* caseType; // 'case' is a reserved keyword for switch()
+//        if (mesh.nonlinear)
+//            caseType = new Nonlinear(mesh);
+//        else
+//            caseType = new Linear(mesh);
+//
+//        caseType->solve();
+//        // caseType->printDisp();
+//        // caseType->printStrain();
+//        // caseType->printStress();
+//        // caseType->writeToFile(outFileName);
+//        // caseType->writeToVTK(outVTKName);
+//        delete caseType; caseType = NULL;
+//    }
 
     // Normal Single case
     // Analysis* case1 = new Linear(inFileName);
