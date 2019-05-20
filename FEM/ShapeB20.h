@@ -3,11 +3,7 @@
  * Derived class from Shape for the shape information of isoparametric B20 element.
  *
  * @author Haohang Huang
- * @date Feburary 13, 2018
- * @note Efficiency optimized by pass/return-by-ref of Gaussian points on March 25,
- * 2018.
- * @note Efficiency optimized by pre-cached the shape functions evaluated at all
- * Gaussian integraton points on Apr 22, 2018.
+ * @date May 19, 2019
  */
 
 #ifndef ShapeB20_h
@@ -15,22 +11,29 @@
 
 #include "Shape.h"
 
-/* Derived class for the shape of isoparametric B20 element.
+/* Derived class for the shape of isoparametric B20 element. See shape info in ElementB20.cpp.
  * The sketch and index of the B20 element is:
  *
- * 3 -- 6 -- 2
- * |         |
- * 7         5
- * |         |
- * 0 -- 4 -- 1
+ * z = +1 level:
+ * 4 -- 19 -- 7
+ * |          |
+ * 16         18
+ * |          |
+ * 5 -- 17 -- 6
  *
- * The sketch and index of the Gaussian integration points is:
+ * z = 0 level:
+ * 12 ------- 15
+ * |          |
+ * |          |
+ * |          |
+ * 13 ------- 14
  *
- * 6 -- 7 -- 8
- * |    |    |
- * 3 -- 4 -- 5
- * |    |    |
- * 0 -- 1 -- 2
+ * z = -1 level:
+ * 0 -- 11 -- 3
+ * |          |
+ * 8         10
+ * |          |
+ * 1 -- 9 --  2
  */
 class ShapeB20 : public Shape
 {
@@ -39,13 +42,17 @@ class ShapeB20 : public Shape
         ShapeB20(const int & nodes, const int & gaussians, const int & edges, const int & edgeNodes, const int & edgeGaussians);
         ~ShapeB20();
 
-        VectorXd functionVec(const Vector2d & point) const;
-        MatrixXd functionMat(const Vector2d & point) const;
-        MatrixXd functionDeriv(const Vector2d & point) const;
+        VectorXd functionVec(const Vector3d & point) const;
+        MatrixXd functionMat(const Vector3d & point) const;
+        MatrixXd functionDeriv(const Vector3d & point) const;
 
         VectorXd edgeFunctionVec(const double & point) const;
         MatrixXd edgeFunctionMat(const double & point) const;
         VectorXd edgeFunctionDeriv(const double & point) const;
+
+        VectorXd faceFunctionVec(const Vector2d & point) const;
+        MatrixXd faceFunctionMat(const Vector2d & point) const;
+        MatrixXd faceFunctionDeriv(const Vector2d & point) const;
 
 };
 

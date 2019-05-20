@@ -3,15 +3,16 @@
  * Implementation of ElementB20 class.
  *
  * @author Haohang Huang
- * @date Feburary 13, 2018
+ * @date May 19, 2019
  */
 
 #include "ElementB20.h"
 
 // static member should be initialized outside the class body because it doesn't
 // depend on any instance of that class and is initialized before any instance is
-// created. Initialization here does not require the static member to be public.
-ElementB20::staticMembers ElementB20::statics(8,9,4,3,3);
+// created. Initialization here does not require the static member to be public (protected is ok).
+// See constructor details in Element.h
+ElementB20::staticMembers ElementB20::statics(20,27,12,3,3,6,8,9);
 
 ElementB20::ElementB20()
 {

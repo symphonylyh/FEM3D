@@ -260,20 +260,20 @@ class Element
                * @param edgeGaussians Number of Gaussian intergration points at each
                * edge.
                */
-              staticMembers(int nodes, int gaussians, int edges, int edgeNodes, int edgeGaussians) {
+              staticMembers(int nodes, int gaussians, int edges, int edgeNodes, int edgeGaussians, int faces, int faceNodes, int faceGaussians) {
                   // Create instances of different types of shape
                   switch (nodes) {
                       case 3 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians); // @TODO change to Q3 later
+                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians); // @TODO change to Q3 later
                           break;
                       case 6 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians); // @TODO change to Q6 later
+                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians); // @TODO change to Q6 later
                           break;
                       case 8 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians);
+                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians);
                           break;
                       case 20 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians);
+                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians);
                           break;
                   }
               }
