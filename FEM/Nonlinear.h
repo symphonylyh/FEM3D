@@ -3,16 +3,9 @@
  * Derived class from Analysis for nonlinear elastic problems.
  *
  * @author Haohang Huang
- * @date May 19, 2018
- * @note Add no tension analysis on June 1, 2018.
+ * @date May 21, 2019
  */
 
-// Confusion:
-// 1. principal stress compute in GT-PAVE
-// 2. is my understanding of nonlinear analysis right?
-// 3. the meaning of 3 Uzan parameters?
-// 4. why the nonlinear converge to the same displacment result with linear elastic, but with very different (much smaller) modulus values?
-// 5. the displacment values are related to the guess value?
 #ifndef Nonlinear_h
 #define Nonlinear_h
 
@@ -37,13 +30,6 @@ class Nonlinear : public Analysis
     bool nonlinearIteration(double damping);
 
     /**
-     * Compute unbalanced tension stresses at Gaussian points, and update the nodal force vector for next iterations.
-     *
-     * @return A boolean value incidating the convergence status at this iteration.
-     */
-    bool noTensionIteration();
-
-    /**
      * Helper function for the convertion to principal stresses from cylindrical coordinates.
      *
      * @param stress Stresses in cylindrical coordinates, sigma_r, sigma_theta, sigma_z, tau_rz
@@ -53,7 +39,7 @@ class Nonlinear : public Analysis
 
   private:
     int gravityIncrementNum; /* No. of body load (gravity & temperature & residual) increments */
-    int loadIncrementNum; /* No. of traffic load (point & edge) increments */
+    int loadIncrementNum; /* No. of traffic load (point & edge & face) increments */
     double gravityDamping; /* Damping ratio lambda for body force incremental loading */
     double loadDamping; /* Damping ratio lambda for traffic incremental loading */
 

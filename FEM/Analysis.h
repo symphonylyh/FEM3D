@@ -53,12 +53,12 @@ class Analysis
         virtual ~Analysis();
 
         /**
-         * Apply point load and edge load at each node in the global force vector.
-         * The body force and temperature load should be applied element-wise
+         * Apply point/edge/face load at each node in the global force vector.
+         * Note the body force and temperature load should be applied element-wise
          * during the stiffness matrix assembly steps. This step only applies traffic loads.
          */
         void applyForce();
-        
+
         /**
          * Assemble the global stiffness matrix from the local stiffness matrix
          * of each element, meanwhile assemble the force vector with modifications

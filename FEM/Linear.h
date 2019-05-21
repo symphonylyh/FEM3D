@@ -3,8 +3,7 @@
  * Derived class from Analysis for linear elastic problems.
  *
  * @author Haohang Huang
- * @date Feburary 26, 2018
- * @note No efficiency optimization required on March 26, 2018
+ * @date May 21, 2019
  */
 
 #ifndef Linear_h
