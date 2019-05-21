@@ -351,7 +351,7 @@ VectorXd Nonlinear::principalStress(const VectorXd & stress) const
     // [sigma_x, tau_yx, tau_zx]
     // [tau_xy, sigma_y, tau_zy]
     // [tau_xz, tau_yz, sigma_z]
-    // Eigenvalues of stress tensor is the principal stress sigma1, sigma2, sigma3
+    // Eigenvalues of stress tensor is the principal stress sigma3, sigma2, sigma1 (Eigen returns in increasing order)
     // In our coordinates, -:compression +:tension
     MatrixXd tensor(3,3);
     tensor << stress(0), stress(3), stress(5),
