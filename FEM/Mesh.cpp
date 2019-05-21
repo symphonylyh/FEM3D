@@ -3,14 +3,11 @@
  * Implementation of Mesh class.
  *
  * @author Haohang Huang
- * @date Feburary 5, 2018
- * @todo line 95, 98, change to T3, Q6 element later.
+ * @date May 20, 2019
  */
 
 #include "Mesh.h"
-#include "ElementQ4.h"
-#include "ElementT6.h"
-#include "ElementQ8.h"
+#include "ElementB20.h"
 #include "LinearElastic.h"
 #include "NonlinearElastic.h"
 #include <iostream>

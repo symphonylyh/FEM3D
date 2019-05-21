@@ -22,12 +22,13 @@ ElementB20::ElementB20(const int & index, const std::vector<int> & nodeList, Nod
     : Element(index, nodeList, meshNode, material) // call the constructor of base class in the initializer list!
 {
     if (!material->anisotropy) {
-        modulusAtGaussPt = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulus()); // 9 x 1 vector, the length depends on element type, so can only be initialized in derived class
+        modulusAtGaussPt = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulus()); // 27 x 1 vector, the length depends on element type, so can only be initialized in derived class
     } else {
-        modulusAtGaussPt = MatrixXd(statics.shape->gaussianPt().size(), 3); // 9 x 3 Matrix. Each column: horizontal modulus, vertical modulus, shear modulus
-        modulusAtGaussPt.col(0) = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulusR());
-        modulusAtGaussPt.col(1) = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulusZ());
-        modulusAtGaussPt.col(2) = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulusG());
+        modulusAtGaussPt = MatrixXd(statics.shape->gaussianPt().size(), 4); // 27 x 4 Matrix. Each column: Mx, My, Mz, shear modulus G
+        modulusAtGaussPt.col(0) = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulusX());
+        modulusAtGaussPt.col(1) = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulusY());
+        modulusAtGaussPt.col(2) = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulusZ());
+        modulusAtGaussPt.col(3) = VectorXd::Constant(statics.shape->gaussianPt().size(), material_->modulusG());
     }
 }
 

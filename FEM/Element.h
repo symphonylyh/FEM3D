@@ -154,7 +154,7 @@ class Element
          */
         MatrixXd BMatrix(const Vector3d & point) const;
 
-        /** A g-by-1 vector (isotropic) or g-by-3 matrix (anisotropic), where g is the number of Gaussian points of this element */
+        /** A g-by-1 vector (isotropic) or g-by-4 matrix (anisotropic), where g is the number of Gaussian points of this element */
         MatrixXd modulusAtGaussPt; // for nonlinear analysis, made public for easier access
 
         /**
@@ -263,17 +263,8 @@ class Element
               staticMembers(int nodes, int gaussians, int edges, int edgeNodes, int edgeGaussians, int faces, int faceNodes, int faceGaussians) {
                   // Create instances of different types of shape
                   switch (nodes) {
-                      case 3 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians); // @TODO change to Q3 later
-                          break;
-                      case 6 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians); // @TODO change to Q6 later
-                          break;
-                      case 8 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians);
-                          break;
                       case 20 :
-                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, int faces, int faceNodes, int faceGaussians);
+                          shape = new ShapeB20(nodes, gaussians, edges, edgeNodes, edgeGaussians, faces, faceNodes, faceGaussians);
                           break;
                   }
               }

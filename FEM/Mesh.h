@@ -3,8 +3,7 @@
  * Mesh class for the entire mesh information read from input file.
  *
  * @author Haohang Huang
- * @date Feburary 5, 2018
- * @note No efficiency optimization required on March 26, 2018
+ * @date May 20, 2019
  */
 
 #ifndef Mesh_h
@@ -101,8 +100,8 @@ class Mesh
         /** A list of the degree of freedom that are at boundary
          *
          * @note Actually this is not NODE list, but degree of freedom list,
-         * e.g., if node 1,2 are X&Y fixed, node 4 is x fixed, then the DOF list
-         * is (2,3 | 4,5 | 8) and the boundary value list below is (0,0,0,0,0).
+         * e.g., if node 1,2 are X&Y fixed, node 4 is fully fixed, then the DOF list
+         * is (3,4 | 6,7 | 12,13,14) and the boundary value list below is (0,0,0,0,0,0,0).
          */
         std::vector<int> boundaryNodeList;
 
@@ -116,13 +115,22 @@ class Mesh
         std::vector<double> loadValue;
 
         /** A list of the elements with applied edge load */
-        std::vector<int> loadElementList;
+        std::vector<int> edgeLoadElementList;
 
-        /** A list of loaded edges in each element */
+        /** A list of loaded edges in each edge-loaded element above */
         std::vector<std::vector<int> > loadEdgeList;
 
-        /** A list of the edge load values for each element above */
+        /** A list of the edge load values (Fx, Fy, Fz) for each edge-loaded element above */
         std::vector<std::vector<double> > edgeLoadValue;
+
+        /** A list of the elements with applied face load */
+        std::vector<int> faceLoadElementList;
+
+        /** A list of loaded faces in each face-loaded element above */
+        std::vector<std::vector<int> > loadFaceList;
+
+        /** A list of the face load values (Fx, Fy, Fz) for each face-loaded element above */
+        std::vector<std::vector<double> > faceLoadValue;
 
         /** The universal body force (not used) */
         std::vector<double> bodyForce;
@@ -146,7 +154,7 @@ class Mesh
          */
         Node** meshNode_;
 
-        /** A pointer to the node pool */
+        /** A pointer to the element pool */
         Element** meshElement_;
 
         /**

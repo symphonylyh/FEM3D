@@ -13,13 +13,12 @@
 
 #include "Linear.h"
 #include "Nonlinear.h"
-#include "BackAnalysis.h"
-// #include "IO.h" //#include "Matrix/src/Core/IO.h" // to change the folder name, you can just change in Node.h and Shape.h into "include Matrix/Eigen"
 
 // 2D-->3D notes:
 // 1. Vector2d to Vector3d, VectorXd should be treated carefully in the initializer list
 // 2. stress & strain tensor dimension 4-->6
 // 3. More input parameters for constructor
+// Flow: Node --> Shape --> Element --> Analysis --> Mesh --> Material
 
 int main(int argc, char const *argv[]) {
     //IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");

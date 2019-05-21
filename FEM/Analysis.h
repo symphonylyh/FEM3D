@@ -3,11 +3,7 @@
  * Abstract Analysis class for various types of analysis.
  *
  * @author Haohang Huang
- * @date Feburary 26, 2018
- * @note Efficiency optimized by local stiffness matrix return-by-ref on March 27, 2018.
- * @note Efficiency optimized by the abstraction of all element- and shape-related operations
- * into generic forms on Apr 22, 2018.
- * @todo Query point method.
+ * @date May 20, 2019
  */
 
 #ifndef Analysis_h
@@ -43,17 +39,12 @@
 class Analysis
 {
     public:
-        /**
-         * Default constructor for Analysis.
-         */
-        // Analysis();
 
         /**
          * Custom constructor to get the mesh info of input file for analysis.
          *
          * @param mesh The read-in mesh object.
          */
-        // Analysis(std::string const & fileName);
         Analysis(Mesh & meshInfo);
 
         /**
@@ -62,6 +53,13 @@ class Analysis
         virtual ~Analysis();
 
         /**
+         * Apply point load and edge load at each node in the global force vector.
+         * The body force and temperature load should be applied element-wise
+         * during the stiffness matrix assembly steps. This step only applies traffic loads.
+         */
+        void applyForce();
+        
+        /**
          * Assemble the global stiffness matrix from the local stiffness matrix
          * of each element, meanwhile assemble the force vector with modifications
          * based on the applied boundary conditons.
@@ -69,19 +67,7 @@ class Analysis
         void assembleStiffness();
 
         /**
-         * Apply point load and edge load at each node in the global force vector.
-         * The body force and temperature load should be applied element-wise
-         * during the stiffness matrix assembly steps.
-         */
-        void applyForce();
-
-        /**
-         * Designate boundary condition at nodes (not used).
-         */
-        // void boundaryCondition();
-
-        /**
-         * Solve the problem using different approaches.
+         * Solve the problem using different approaches. Pure virtual method.
          */
         virtual void solve() = 0;
 
@@ -95,8 +81,6 @@ class Analysis
          * Average nodal strain and stress at each node.
          */
         void averageStrainAndStress();
-
-        // @TODO Query queryPoint(const double & x, const double & y) const; // create a Query object of disp, strain, stress and return it. Query needs interpolation based on shape function, and need to find the nearest neighbor or locate the element it's in. Should also check if post-processing software does this for us
 
         /**
          * Print the nodal displacement.
@@ -114,11 +98,6 @@ class Analysis
         void printStress() const;
 
         /**
-         * Write the outputs to file.
-         */
-        void writeToFile(std::string const & fileName) const;
-
-        /**
          * Write the outputs into a .vtk file for post-processing.
          */
         void writeToVTK(std::string const & fileName) const;
@@ -128,19 +107,19 @@ class Analysis
         /** The mesh information of the problem */
         Mesh & mesh;
 
-        /** The global stiffness matrix as a 2n-by-2n sparse matrix */
+        /** The global stiffness matrix as a 3n-by-3n sparse matrix */
         SparseMatrix<double> globalStiffness;
 
-        /** The nodal displacement 2n-by-1 vector */
+        /** The nodal displacement 3n-by-1 vector */
         VectorXd nodalDisp;
 
-        /** The nodal force 2n-by-1 vector */
+        /** The nodal force 3n-by-1 vector */
         VectorXd nodalForce;
 
-        /** The nodal strain n-by-4 matrix */
+        /** The nodal strain n-by-6 matrix */
         MatrixXd nodalStrain;
 
-        /** The nodal strain n-by-4 matrix */
+        /** The nodal strain n-by-6 matrix */
         MatrixXd nodalStress;
 };
 
