@@ -55,6 +55,10 @@ Line X: Iteration parameters (after info of all nonlinear layers) [# of gravity 
 6 1 2
 // Magnitude of edge load (Fx, Fy, Fz)
 0 0 -10 0 0 -15
+// Element index to assign face load & loaded face numbers (e.g., assign to face 8 and 12 (note the zero-based index!)of element No.13)
+13 7 11
+// Magnitude of face load (Fx, Fy, Fz)
+0 0 -10 0 0 -15
 
 // ----------------- Node coordinates (x,y,z) --------------------------------------
 0 0 0

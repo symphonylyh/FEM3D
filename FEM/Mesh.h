@@ -94,19 +94,11 @@ class Mesh
         /** A list of layered materials */
         std::vector<Material*> materialList;
 
+        /** Analysis type */
+        bool nonlinear;
+
         /** Iteration parameters used in nonlinear scheme */
         std::vector<double> iterations;
-
-        /** A list of the degree of freedom that are at boundary
-         *
-         * @note Actually this is not NODE list, but degree of freedom list,
-         * e.g., if node 1,2 are X&Y fixed, node 4 is fully fixed, then the DOF list
-         * is (3,4 | 6,7 | 12,13,14) and the boundary value list below is (0,0,0,0,0,0,0).
-         */
-        std::vector<int> boundaryNodeList;
-
-        /** The boundary values corresponding to the DOF list above */
-        std::vector<double> boundaryValue;
 
         /** A DOF list (see above) of the node with applied point load */
         std::vector<int> loadNodeList;
@@ -132,11 +124,16 @@ class Mesh
         /** A list of the face load values (Fx, Fy, Fz) for each face-loaded element above */
         std::vector<std::vector<double> > faceLoadValue;
 
-        /** The universal body force (not used) */
-        std::vector<double> bodyForce;
+        /** A list of the degree of freedom that are at boundary
+         *
+         * @note Actually this is not NODE list, but degree of freedom list,
+         * e.g., if node 1,2 are X&Y fixed, node 4 is fully fixed, then the DOF list
+         * is (3,4 | 6,7 | 12,13,14) and the boundary value list below is (0,0,0,0,0,0,0).
+         */
+        std::vector<int> boundaryNodeList;
 
-        /** Analysis type */
-        bool nonlinear;
+        /** The boundary values corresponding to the DOF list above */
+        std::vector<double> boundaryValue;
 
     private:
         /** Total number of nodes */

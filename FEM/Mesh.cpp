@@ -100,12 +100,12 @@ void Mesh::readFromFile(std::string const & fileName)
     for (int i = 0; i < elementProperties; i++) {
         std::getline(file, readLine);
         std::vector<int> range;
-        parseLine(readLine, range); // range will store 0 4 1 0 0
+        parseLine(readLine, range); // range will store 0 19 0 0
         layerMap[range[0]] = i; // record the lower bound of the range
         std::getline(file, readLine);
         parseLine(readLine, elementProperty);
         if (range[3] == 0) // linear elastic
-            materialList.push_back(new LinearElastic(range[2], range[3], range[4], elementProperty)); // dynamically allocated, remember to delete in destructor!
+            materialList.push_back(new LinearElastic(range[2], range[3], elementProperty)); // dynamically allocated, remember to delete in destructor!
         else { // nonlinear elastic
             nonlinear = true;
             // for nonlinear layer it should read two more lines about the material model parameters
@@ -114,77 +114,84 @@ void Mesh::readFromFile(std::string const & fileName)
             std::getline(file, readLine);
             std::vector<double> parameters;
             parseLine(readLine, parameters);
-            materialList.push_back(new NonlinearElastic(range[2], range[3], range[4], elementProperty, model, parameters));
+            materialList.push_back(new NonlinearElastic(range[2], range[3], elementProperty, model, parameters));
         }
-        // 0 if isotropic, 1 if cross-anisotropic; 0 if linear elastic, 1 if nonlinear elastic; 0 if normal material, 1 if no-tension material.
+        // 0 if isotropic, 1 if cross-anisotropic; 0 if linear elastic, 1 if nonlinear elastic
     }
     std::vector<double>().swap(elementProperty);
 
-    // Read nonlinear iteration parameters (No. of load increments, damping ratios) if there are at least one nonlinear material
+    // For nonlinear analysis it should read one additional line after all layers, for iteration parameters (No. of load increments, damping ratios) if there are at least one nonlinear material
     if (nonlinear) {
         std::getline(file, readLine);
-        parseLine(readLine, iterations); // vector "iterations" declared as a member variable of Mesh class, to be used in Nonlinear class
+        parseLine(readLine, iterations); // vector "iterations" declared as a member variable of Mesh class, to be used in ctor of Nonlinear class
     }
 
     // -------------------------------------------------------------------------
-    // ------------------------ Loading (Point & Edge) -------------------------
+    // -------------------- Loading (Point & Edge & Face) ----------------------
     // -------------------------------------------------------------------------
     loadNodeList.clear();
     loadValue.clear(); // these two are the public member variables of Mesh class, to be used in Analysis->applyForce()
-    // Read X-direction load
-    if (loadX > 0) {
-        std::vector<int> loadXNodeList;
-        std::vector<double> loadXValue;
+    // Read point loads
+    if (pointLoad > 0) {
+        std::vector<int> pointNodeList;
+        std::vector<double> pointLoadValue;
         std::getline(file, readLine);
-        parseLine(readLine, loadXNodeList);
+        parseLine(readLine, pointNodeList);
         std::getline(file, readLine);
-        parseLine(readLine, loadXValue);
-        for (int i = 0; i < loadX; i++) {
-            loadNodeList.push_back(2 * loadXNodeList[i]);
-            loadValue.push_back(loadXValue[i]);
+        parseLine(readLine, pointLoadValue);
+        for (int i = 0; i < pointLoad; i++) {
+            // Convert node index to DOF index
+            loadNodeList.push_back(3 * pointNodeList[i]);
+            loadNodeList.push_back(3 * pointNodeList[i] + 1);
+            loadNodeList.push_back(3 * pointNodeList[i] + 2);
+            // Assign load value
+            loadValue.push_back(pointLoadValue[3 * i]);
+            loadValue.push_back(pointLoadValue[3 * i + 1]);
+            loadValue.push_back(pointLoadValue[3 * i + 2]);
         }
-        std::vector<int>().swap(loadXNodeList);
-        std::vector<double>().swap(loadXValue);
+        std::vector<int>().swap(pointNodeList);
+        std::vector<double>().swap(pointLoadValue);
     }
 
-    // Read Y-direction load
-    if (loadY > 0) {
-        std::vector<int> loadYNodeList;
-        std::vector<double> loadYValue;
-        std::getline(file, readLine);
-        parseLine(readLine, loadYNodeList);
-        std::getline(file, readLine);
-        parseLine(readLine, loadYValue);
-        for (int i = 0; i < loadY; i++) {
-            loadNodeList.push_back(2 * loadYNodeList[i] + 1);
-            loadValue.push_back(loadYValue[i]);
-        }
-        std::vector<int>().swap(loadYNodeList);
-        std::vector<double>().swap(loadYValue);
-    }
-
-    loadElementList.clear();
+    edgeLoadElementList.clear();
     loadEdgeList.clear();
     edgeLoadValue.clear();
     // Read edge loads
     if (edgeLoad > 0) {
-        loadElementList.reserve(edgeLoad);
-        loadEdgeList.reserve(4 * edgeLoad); // at most all edges loaded
-        edgeLoadValue.reserve(8 * edgeLoad); // X-Y direction
-
-        std::vector<int> temp;
-        std::vector<int> temp2;
-        std::vector<double> temp3;
+        std::vector<int> line1;
+        std::vector<int> edgeNo;
+        std::vector<double> line2;
         for (int i = 0; i < edgeLoad; i++) {
             std::getline(file, readLine);
-            parseLine(readLine, temp);
-            loadElementList.emplace_back(temp.front()); // the element index
-            temp2.assign(temp.begin() + 1, temp.end()); // the edge list // Note: assign() will rewrite temp2
-            loadEdgeList.emplace_back(temp2);
+            parseLine(readLine, line1);
+            edgeLoadElementList.emplace_back(line1.front()); // 1st entry: element index
+            edgeNo.assign(line1.begin() + 1, line1.end()); // rest entries: edge list // Note: assign() will rewrite edgeNo. using erase() is also ok
+            loadEdgeList.emplace_back(edgeNo);
 
             std::getline(file, readLine);
-            parseLine(readLine, temp3);
-            edgeLoadValue.emplace_back(temp3);
+            parseLine(readLine, line2);
+            edgeLoadValue.emplace_back(line2);
+        }
+    }
+
+    faceLoadElementList.clear();
+    loadFaceList.clear();
+    faceLoadValue.clear();
+    // Read face loads
+    if (faceLoad > 0) {
+        std::vector<int> line1;
+        std::vector<int> faceNo;
+        std::vector<double> line2;
+        for (int i = 0; i < faceLoad; i++) {
+            std::getline(file, readLine);
+            parseLine(readLine, line1);
+            faceLoadElementList.emplace_back(line1.front()); // 1st entry: element index
+            faceNo.assign(line1.begin() + 1, line1.end()); // rest entries: face list // Note: assign() will rewrite edgeNo
+            loadFaceList.emplace_back(faceNo);
+
+            std::getline(file, readLine);
+            parseLine(readLine, line2);
+            faceLoadValue.emplace_back(line2);
         }
     }
 
@@ -192,11 +199,11 @@ void Mesh::readFromFile(std::string const & fileName)
     // ------------------------ Node Coordinates -------------------------------
     // -------------------------------------------------------------------------
     // Read node coordinates
-    std::vector<double> nodeCoord(2); // 2D
+    std::vector<double> nodeCoord(3); // 3D
     for (int i = 0; i < nodeCount_; i++) {
         std::getline(file, readLine);
         parseLine(readLine, nodeCoord);
-        meshNode_[i] = new Node(i, nodeCoord[0], nodeCoord[1]);
+        meshNode_[i] = new Node(i, nodeCoord[0], nodeCoord[1], nodeCoord[2]);
     }
     std::vector<double>().swap(nodeCoord);
 
@@ -205,7 +212,6 @@ void Mesh::readFromFile(std::string const & fileName)
     // -------------------------------------------------------------------------
     // Read element's node list and create the corresponding element type
     std::vector<int> elementNodeList;
-    elementNodeList.reserve(8); // at most Q8 element
     for (int i = 0; i < elementCount_; i++) {
         std::getline(file, readLine);
         // Option 2: denote element node number at the beginning of the line
@@ -222,14 +228,8 @@ void Mesh::readFromFile(std::string const & fileName)
         Material* material = materialList[(--it)->second];
         // Create instances of different types of element
         switch (size) {
-            case 3 :
-                meshElement_[i] = new ElementQ8(i, elementNodeList, meshNode_, material); // @TODO change to Q3 later
-                break;
-            case 6 :
-                meshElement_[i] = new ElementQ8(i, elementNodeList, meshNode_, material); // @TODO change to Q6 later
-                break;
-            case 8 :
-                meshElement_[i] = new ElementQ8(i, elementNodeList, meshNode_, material);
+            case 20 :
+                meshElement_[i] = new ElementB20(i, elementNodeList, meshNode_, material);
                 break;
         }
     }
@@ -239,8 +239,8 @@ void Mesh::readFromFile(std::string const & fileName)
     // ------------------------ Boundary Conditions ----------------------------
     // -------------------------------------------------------------------------
     boundaryNodeList.clear();
-    boundaryValue.clear(); // these two are the public member variables of Mesh class, to be used in Analysis->boundaryCondition()
-    // Read and set X-direction boundary condition (no need to set to Node at this time, the nodal displacement will be assigned after sovling Ku=F in Analysis->solveDisp())
+    boundaryValue.clear(); // these two are the public member variables of Mesh class, to be used in Analysis->assembleStiffness()
+    // Read and set X-direction boundary condition (no need to set to Node at this time, the nodal displacement will be finalized after sovling Ku=F in Analysis->solveDisp())
     if (boundaryX > 0) {
         std::vector<int> boundaryXNodeList;
         std::vector<double> boundaryXValue;
@@ -249,7 +249,7 @@ void Mesh::readFromFile(std::string const & fileName)
         std::getline(file, readLine);
         parseLine(readLine, boundaryXValue);
         for (int i = 0; i < boundaryX; i++) {
-            boundaryNodeList.push_back(2 * boundaryXNodeList[i]);
+            boundaryNodeList.push_back(3 * boundaryXNodeList[i]); // convert to DOF index
             boundaryValue.push_back(boundaryXValue[i]);
         }
         std::vector<int>().swap(boundaryXNodeList);
@@ -265,11 +265,27 @@ void Mesh::readFromFile(std::string const & fileName)
         std::getline(file, readLine);
         parseLine(readLine, boundaryYValue);
         for (int i = 0; i < boundaryY; i++) {
-            boundaryNodeList.push_back(2 * boundaryYNodeList[i] + 1);
+            boundaryNodeList.push_back(3 * boundaryYNodeList[i] + 1);
             boundaryValue.push_back(boundaryYValue[i]);
         }
         std::vector<int>().swap(boundaryYNodeList);
         std::vector<double>().swap(boundaryYValue);
+    }
+
+    // Read and set Z-direction boundary condition
+    if (boundaryY > 0) {
+        std::vector<int> boundaryZNodeList;
+        std::vector<double> boundaryZValue;
+        std::getline(file, readLine);
+        parseLine(readLine, boundaryZNodeList);
+        std::getline(file, readLine);
+        parseLine(readLine, boundaryZValue);
+        for (int i = 0; i < boundaryZ; i++) {
+            boundaryNodeList.push_back(3 * boundaryZNodeList[i] + 2);
+            boundaryValue.push_back(boundaryZValue[i]);
+        }
+        std::vector<int>().swap(boundaryZNodeList);
+        std::vector<double>().swap(boundaryZValue);
     }
 
     // Complete read-in
