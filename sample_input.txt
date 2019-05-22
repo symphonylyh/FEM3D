@@ -1,0 +1,83 @@
+// ----------------- Summary header information --------------------------------------
+// Total number of nodes
+// Total number of elements
+// Total number of different materials these elements should be assigned to
+// Total number of point loads
+// Total number of edge loads
+// Total number of face loads
+// Total number of displacement constraints in X-direction
+// Total number of displacement constraints in Y-direction
+// Total number of displacement constraints in Z-direction
+40 9 2 0 3 4 1 19 7 
+
+// ----------------- Layer material properties -------------------------------------
+// ---------------------------------------------
+Line 1: Element index (start, end) to assign material property. And layer features: isotropic(0)-anisotropic(1) linear(0)-nonlinear(1)
+0 19 0 0 
+// ---------------------------------------------
+Line 2 and forth: The assigned parameters for layer property. 
+// --- Case 1: Linear, Isotropic --- //
+// Modulus, Poisson's ratio, body force (x,y,z), thermal coefficient, temperature change.
+30000 0.3 0 0 -0.0807 6.5e-6 100
+// --- Case 2: Linear, Anisotropic --- //
+// X Modulus, Y Modulus, Z Modulus, XY PRatio, YZ PRatio, ZX PRatio, Shear Modulus, body force (x,y,z), thermal coeff, temperature change.
+6750 6750 45000 0.15 0.15 0.45 15734 0 0 -0.0807 6.5e-6 0
+// ----- Nonlinear case will have the following additional lines ----- //
+Line 3: Model No. [K-theta:1 Uzan:2 UT-Austin:3 MEPDG:4]
+Line 4: Model parameters [K1, K2, K3]. In anisotropic case, provide triplets of parameters
+// --- Case 1: Nonlinear, Isotropic --- // 
+1 // K-theta model
+4231 0.3
+// --- Case 2: Nonlinear, Anisotropic --- // 
+2  // Uzan model
+4231 0.645 -0.056 4231 0.645 -0.056 4231 0.645 -0.056 4231 0.645 -0.056
+// --- Iterations parameters for nonlinear case --- // 
+Line X: Iteration parameters (after info of all nonlinear layers) [# of gravity load increments(5), # of traffic load increments(10), damping ratio of gravity load(0.3), damping ratio of traffic load(0.3)] [# of increments = 0 means non-incremental loading]
+5 10 0.3 0.3
+
+// A Full example (3-layer)
+0 4 0 0    // layer 1 (linear, isotropic)
+30000 0.3 0 0 -0.0807 6.5e-6 100
+5 8 1 1    // layer 2 (nonlinear, anisotropic)
+6750 6750 45000 0.15 0.15 0.45 15734 0 0 -0.0807 6.5e-6 0
+2          // Uzan model parameters for layer 2
+4231 0.645 -0.056 4231 0.645 -0.056 4231 0.645 -0.056 4231 0.645 -0.056
+9 12 1 0   // layer 3 (linear, anisotropic)
+6750 6750 45000 0.15 0.15 0.45 15734 0 0 -0.0807 6.5e-6 0
+0 0 0.3 0.3
+
+// ----------------- Loading -------------------------------------
+// Node index to assign point load
+33 34 35
+// Magnitude of point load 
+0 -30 0 0 -30 0 0 -30 0
+// Element index to assign edge load & loaded edge numbers (e.g., assign to edge 2 and 3 (note the zero-based index!)of element No.6)
+6 1 2
+// Magnitude of edge load (Fx, Fy, Fz)
+0 0 -10 0 0 -15
+
+// ----------------- Node coordinates (x,y,z) --------------------------------------
+0 0 0
+3 0 0
+6 0 0
+9 0 0
+
+// ------------------Element node list -------------------------------------
+20 0 2 13 11 1 8 12 7 0 2 13 11 1 8 12 7 0 2 13 11
+20 2 4 15 13 3 9 14 8 2 4 15 13 3 9 14 8 2 4 15 13
+
+// ----------------- Boundary conditions -------------------------------------
+// Node index for X-direction boundary condition
+0 1 2 3 4 5 6 7 11 18 22 29 33 10 17 21 28 32 39
+// X-direction boundary value
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+// Node index for Y-direction boundary condition
+0 1 2 3 4 5 6
+// Y-direction boundary value
+0 0 0 0 0 0 0
+// Node index for Z-direction boundary condition
+0 1 2 3 4 5 6
+// Z-direction boundary value
+0 0 0 0 0 0 0
+
+  

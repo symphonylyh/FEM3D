@@ -3,7 +3,7 @@
  * Implementation of Mesh class.
  *
  * @author Haohang Huang
- * @date May 20, 2019
+ * @date May 21, 2019
  */
 
 #include "Mesh.h"
@@ -59,25 +59,27 @@ void Mesh::readFromFile(std::string const & fileName)
     // ------------------------ General Information ----------------------------
     // -------------------------------------------------------------------------
     // Read the first line of the file as mesh summary info including:
-    // Total number of nodes
-    // Total number of elements
-    // Total number of different types of material property the elements should be assigned to
-    // Total number of point loads in X-direction
-    // Total number of point loads in Y-direction
-    // Total number of edge loads
-    // Total number of displacement constraints in X-direction
-    // Total number of displacement constraints in Y-direction
+    // [0] Total number of nodes
+    // [1] Total number of elements
+    // [2] Total number of different types of material property the elements should be assigned to
+    // [3] Total number of point loads
+    // [4] Total number of edge loads
+    // [5] Total number of face loads
+    // [6] Total number of displacement constraints in X-direction
+    // [7] Total number of displacement constraints in Y-direction
+    // [8] Total number of displacement constraints in Z-direction
     std::vector<int> meshSummary;
     std::getline(file, readLine);
     parseLine(readLine, meshSummary);
     nodeCount_ = meshSummary[0];
     elementCount_ = meshSummary[1];
     int elementProperties = meshSummary[2];
-    int loadX = meshSummary[3];
-    int loadY = meshSummary[4];
-    int edgeLoad = meshSummary[5];
+    int pointLoad = meshSummary[3];
+    int edgeLoad = meshSummary[4];
+    int faceLoad = meshSummary[5];
     int boundaryX = meshSummary[6];
     int boundaryY = meshSummary[7];
+    int boundaryZ = meshSummary[8];
     std::vector<int>().swap(meshSummary); // enforce to free the vector memory
 
     // Create node & element array on HEAP
@@ -89,8 +91,8 @@ void Mesh::readFromFile(std::string const & fileName)
     // -------------------------------------------------------------------------
     // Read element properties (modulus, Poisson's ratio, thermal parameters, etc)
     // Format:
-    // Line 1: start & end index of element, material isotropy, linearity, and tension property. e.g., 0 35 0 0 1 means element No.0~35 are isotropic and linear elastic material, with no-tension modification.
-    // Line 2 and so forth: material properties
+    // Line 1: start & end index of element, material isotropy and linearity. e.g., 0 35 0 0 means element No.0~35 are isotropic and linear elastic material.
+    // Line 2 and so forth: specific material properties
     std::map<int, int> layerMap; // use an ordered map to decide layer No. by range finding, e.g., N layers, store N start indices of the element as [0 N1) [N1 N2) [N2 N3)
     std::vector<double> elementProperty;
     materialList.reserve(elementProperties);

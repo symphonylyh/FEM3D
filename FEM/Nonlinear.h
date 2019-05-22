@@ -30,9 +30,9 @@ class Nonlinear : public Analysis
     bool nonlinearIteration(double damping);
 
     /**
-     * Helper function for the convertion to principal stresses from cylindrical coordinates.
+     * Helper function for computing the principal stresses at current stress state.
      *
-     * @param stress Stresses in cylindrical coordinates, sigma_r, sigma_theta, sigma_z, tau_rz
+     * @param stress [sigma_x, sigma_y, sigma_z, tau_xy, tau_yz, tau_zx]
      * @return The principal stresses in sigma3, sigma2, sigma1 order.
      */
     VectorXd principalStress(const VectorXd & stress) const;

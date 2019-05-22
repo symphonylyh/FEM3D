@@ -3,57 +3,68 @@
  * Implementation of NonlinearElastic class.
  *
  * @author Haohang Huang
- * @date May 19, 2018
+ * @date May 21, 2019
  */
 
 #include "NonlinearElastic.h"
 #include <cmath>
 #include <iostream>
-NonlinearElastic::NonlinearElastic(const bool & anisotropy, const bool & nonlinearity, const bool & noTension, const std::vector<double> & properties, const int & model, const std::vector<double> & parameters)
-  : Material(anisotropy, nonlinearity, noTension), modelNo(model), coeff(parameters)
+NonlinearElastic::NonlinearElastic(const bool & anisotropy, const bool & nonlinearity, const std::vector<double> & properties, const int & model, const std::vector<double> & parameters)
+  : Material(anisotropy, nonlinearity), modelNo(model), coeff(parameters)
 {
     // Just copy from LinearElastic constructor
+    // For linear elastic problem, just store a constant E matrix is sufficient, so initialize it in constructor
     int i = 0;
-    if (!anisotropy) { // Isotropic: Modulus, Poisson's ratio, body force (r,z), thermal coefficient, temperature change
-        M_ = properties[i++];
-        v_ = properties[i++];
+    if (!anisotropy) {
+        // Isotropic: Modulus, Poisson's ratio, body force (x,y,z), thermal coefficient, temperature change
+        double M = properties[i++]; M_ = M; // initialize members of base class Material
+        double v = properties[i++]; v_ = v;
 
         // Compute the stress-strain constitutive matrix
-        E_ << 1 - v_, v_, v_, 0,
-              v_,   1-v_, v_, 0,
-              v_,   v_,  1-v_, 0,
-              0,  0,    0,  (1-2*v_)/2;
-        E_ = E_ * M_ / (1+v_) /(1-2*v_);
+        E_ << 1 - v, v, v, 0, 0, 0,
+              v,   1-v, v, 0, 0, 0,
+              v,  v,  1-v, 0, 0, 0,
+              0, 0, 0, (1-2*v)/2, 0, 0;
+              0, 0, 0, 0, (1-2*v)/2, 0;
+              0, 0, 0, 0, 0, (1-2*v)/2;
+        E_ = E_ * M / (1+v) /(1-2*v);
     }
-    else { // Cross-anisotropic: Modulus R, Modulus Z, Poisson's ratio R, Poisson's ratio Z, Shear Modulus G, body force (r,z), thermal coefficient, temperature change
-        Mr_ = properties[i++];
-        Mz_ = properties[i++];
-        vr_ = properties[i++];
-        vz_ = properties[i++];
-        G_ = properties[i++];
+    else {
+        // Orthotropic: https://knowledge.autodesk.com/support/moldflow-insight/learn-explore/caas/CloudHelp/cloudhelp/2018/ENU/MoldflowInsight-Analyses/files/GUID-29FDEC3E-0D52-4712-A98C-540228A4C33B-htm.html
+        // Anisotropic: Modulus X, Modulus Y, Modulus Z, Poisson's ratio XY, Poisson's ratio YZ, Poisson's ratio ZX, Shear Modulus G, body force (x,y,z), thermal coefficient, temperature change
+        double Mx = properties[i++]; Mx_ = Mx;
+        double My = properties[i++]; My_ = My;
+        double Mz = properties[i++]; Mz_ = Mz;
+        double vxy = properties[i++]; vxy_ = vxy;
+        double vyz = properties[i++]; vyz_ = vyz;
+        double vzx = properties[i++]; vzx_ = vzx;
+        // note the relation vxy/My = vyx/Mx
+        double vyx = Mx/My * vxy;
+        double vzy = My/Mz * vyz;
+        double vxz = Mz/Mx * vzx;
+        double G = properties[i++]; G_ = G; // here I simplify a little bit by set G_xy = G_yz = G_zx = G
 
-        // Helper coefficients for filling E matrix
-        double n = Mr_ / Mz_;
-        double m = G_ / Mz_;
-        double A = Mz_ / (1 + vr_) / (1 - vr_ - 2 * n * vz_ * vz_);
+        // Helper coefficient
+        double A = (1 - vxy*vyx - vyz*vzy - vxz*vzx - 2*vxy*vyz*vzx) / (Mx*My*Mz);
 
         // Compute the stress-strain constitutive matrix
-        E_ << n * (1 - n * vz_ * vz_), n * (vr_ + n * vz_ * vz_), n * vz_ * (1 + vr_), 0,
-              n * (vr_ + n * vz_ * vz_), n * (1 - n * vz_ * vz_), n * vz_ * (1 + vr_), 0,
-              n * vz_ * (1 + vr_), n * vz_ * (1 + vr_), 1 - vr_ * vr_, 0,
-              0, 0, 0, m * (1 + vr_) * (1 - vr_ - 2 * n * vz_ * vz_);
-        E_ = E_ * A;
+        E_ << (1 - vyz*vzy) / (My*Mz*A), (vyz + vzx*vyz) / (My*Mz*A), (vzx + vyz*vzy) / (My*Mz*A), 0, 0, 0,
+              (vxy + vzx*vxz) / (Mz*Mx*A), (1 - vzx*vxz) / (Mz*Mx*A), (vzy + vzx*vxy) / (Mz*Mx*A), 0, 0, 0,
+              (vxz + vxy*vyz) / (Mx*My*A), (vzy + vxz*vyz) / (Mx*My*A), (1 - vxy*vyx) / (Mx*My*A), 0, 0, 0,
+              0, 0, 0, G, 0, 0;
+              0, 0, 0, 0, G, 0;
+              0, 0, 0, 0, 0, G;
     }
 
     // Assign body force (unit weight)
-    bodyForce_ << properties[i], properties[i+1];
-    i += 2;
+    bodyForce_ << properties[i], properties[i+1], properties[i+2];
+    i += 3;
 
     // Assign thermal parameters
     double alpha  = properties[i++];
     double deltaT = properties[i++]; /** The temperature change (assume same across the entire element) */
     double strain = alpha * deltaT;
-    thermalStrain_ << strain, strain, strain, 0;
+    thermalStrain_ << strain, strain, strain, 0, 0, 0;
 }
 
 NonlinearElastic::~NonlinearElastic()
@@ -72,17 +83,18 @@ VectorXd NonlinearElastic::stressDependentModulus(const VectorXd & stress) const
     double atm = 14.696; // atmospheric pressure, 101.325 kPa or 14.7 psi
 
     // Calculated new stress-dependent resilient modulus from different models
-    double Mr = 0, Mz = 0, G = 0; // horizontal modulus, vertical modulus, shear modulus
+    double Mx = 0, My = 0, Mz = 0, G = 0; // X modulus, Y modulus, Z modulus, shear modulus
     switch (modelNo) {
         case 1 :
             // Hicks and Monismith (1971) K-theta model
             // M = k1 * theta^k2
-            if (!anisotropy) {
+            if (!anisotropy) { // if isotropy, just take the vertical (Z) modulus
                 Mz = coeff[0] * std::pow(bulk, coeff[1]);
             } else {
-                Mr = coeff[0] * std::pow(bulk, coeff[1]); // although K-theta only has 2 parameters, we fill 0 to complement the triplet
-                Mz = coeff[3] * std::pow(bulk, coeff[4]);
-                G = coeff[6] * std::pow(bulk, coeff[7]);
+                Mx = coeff[0] * std::pow(bulk, coeff[1]); // although K-theta only has 2 parameters, we fill 0 to complement the triplet
+                My = coeff[3] * std::pow(bulk, coeff[4]);
+                Mz = coeff[6] * std::pow(bulk, coeff[7]);
+                G = coeff[9] * std::pow(bulk, coeff[10]);
             }
             break;
         case 2 :
@@ -91,9 +103,10 @@ VectorXd NonlinearElastic::stressDependentModulus(const VectorXd & stress) const
             if (!anisotropy) {
                 Mz = coeff[0] * std::pow(bulk, coeff[1]) * std::pow(deviator, coeff[2]);
             } else {
-                Mr = coeff[0] * std::pow(bulk, coeff[1]) * std::pow(deviator, coeff[2]);
-                Mz = coeff[3] * std::pow(bulk, coeff[4]) * std::pow(deviator, coeff[5]);
-                G = coeff[6] * std::pow(bulk, coeff[7]) * std::pow(deviator, coeff[8]);
+                Mx = coeff[0] * std::pow(bulk, coeff[1]) * std::pow(deviator, coeff[2]);
+                My = coeff[3] * std::pow(bulk, coeff[4]) * std::pow(deviator, coeff[5]);
+                Mz = coeff[6] * std::pow(bulk, coeff[7]) * std::pow(deviator, coeff[8]);
+                G = coeff[9] * std::pow(bulk, coeff[10]) * std::pow(deviator, coeff[11]);
             }
             break;
         case 3 :
@@ -102,9 +115,10 @@ VectorXd NonlinearElastic::stressDependentModulus(const VectorXd & stress) const
             if (!anisotropy) {
                 Mz = coeff[0] * std::pow(deviator, coeff[1]) * std::pow(std::abs(stress(0)), coeff[2]);
             } else {
-                Mr = coeff[0] * std::pow(deviator, coeff[1]) * std::pow(std::abs(stress(0)), coeff[2]);
-                Mz = coeff[3] * std::pow(deviator, coeff[4]) * std::pow(std::abs(stress(0)), coeff[5]);
-                G = coeff[6] * std::pow(deviator, coeff[7]) * std::pow(std::abs(stress(0)), coeff[8]);
+                Mx = coeff[0] * std::pow(deviator, coeff[1]) * std::pow(std::abs(stress(0)), coeff[2]);
+                My = coeff[3] * std::pow(deviator, coeff[4]) * std::pow(std::abs(stress(0)), coeff[5]);
+                Mz = coeff[6] * std::pow(deviator, coeff[7]) * std::pow(std::abs(stress(0)), coeff[8]);
+                G = coeff[9] * std::pow(deviator, coeff[10]) * std::pow(std::abs(stress(0)), coeff[11]);
             }
             break;
         case 4 :
@@ -113,35 +127,52 @@ VectorXd NonlinearElastic::stressDependentModulus(const VectorXd & stress) const
             if (!anisotropy) {
                 Mz = coeff[0] * atm * std::pow(bulk/atm, coeff[1]) * std::pow(octahedral/atm + 1, coeff[2]);
             } else {
-                Mr = coeff[0] * atm * std::pow(bulk/atm, coeff[1]) * std::pow(octahedral/atm + 1, coeff[2]);
-                Mz = coeff[3] * atm * std::pow(bulk/atm, coeff[4]) * std::pow(octahedral/atm + 1, coeff[5]);
-                G = coeff[6] * atm * std::pow(bulk/atm, coeff[7]) * std::pow(octahedral/atm + 1, coeff[8]);
+                Mx = coeff[0] * atm * std::pow(bulk/atm, coeff[1]) * std::pow(octahedral/atm + 1, coeff[2]);
+                My = coeff[3] * atm * std::pow(bulk/atm, coeff[4]) * std::pow(octahedral/atm + 1, coeff[5]);
+                Mz = coeff[6] * atm * std::pow(bulk/atm, coeff[7]) * std::pow(octahedral/atm + 1, coeff[8]);
+                G = coeff[9] * atm * std::pow(bulk/atm, coeff[10]) * std::pow(octahedral/atm + 1, coeff[11]);
             }
             break;
     }
-    VectorXd result(3);
-    result << Mr, Mz, G;
+    VectorXd result(4);
+    result << Mx, My, Mz, G;
     return result;
 }
 
 MatrixXd NonlinearElastic::EMatrix(const VectorXd & modulus) const
 {
-    MatrixXd E(4,4);
+    MatrixXd E(6,6);
     if (!anisotropy) {
-        E << 1 - v_, v_, v_, 0,
-              v_,   1-v_, v_, 0,
-              v_,   v_,  1-v_, 0,
-              0,  0,    0,  (1-2*v_)/2;
-        E = E * modulus(0) / (1+v_) /(1-2*v_);
+        double v = v_;
+        E <<  1 - v, v, v, 0, 0, 0,
+              v,   1-v, v, 0, 0, 0,
+              v,  v,  1-v, 0, 0, 0,
+              0, 0, 0, (1-2*v)/2, 0, 0;
+              0, 0, 0, 0, (1-2*v)/2, 0;
+              0, 0, 0, 0, 0, (1-2*v)/2;
+        E = E * modulus(0) / (1+v) /(1-2*v); // for isotropic case, modulus(0) is the constant modulus
     } else {
-        double n = modulus(0) / modulus(1); // Mr / Mz
-        double m = modulus(2) / modulus(1); // G / Mz
-        double A = modulus(1) / (1 + vr_) / (1 - vr_ - 2 * n * vz_ * vz_);
-        E <<  n * (1 - n * vz_ * vz_), n * (vr_ + n * vz_ * vz_), n * vz_ * (1 + vr_), 0,
-              n * (vr_ + n * vz_ * vz_), n * (1 - n * vz_ * vz_), n * vz_ * (1 + vr_), 0,
-              n * vz_ * (1 + vr_), n * vz_ * (1 + vr_), 1 - vr_ * vr_, 0,
-              0, 0, 0, m * (1 + vr_) * (1 - vr_ - 2 * n * vz_ * vz_);
-        E = E * A;
+        double Mx = modulus(0);
+        double My = modulus(1);
+        double Mz = modulus(2);
+        double vxy = vxy_;
+        double vyz = vyz_;
+        double vzx = vzx_;
+        double vyx = Mx/My * vxy;
+        double vzy = My/Mz * vyz;
+        double vxz = Mz/Mx * vzx;
+        double G = modulus(3);
+
+        // Helper coefficient
+        double A = (1 - vxy*vyx - vyz*vzy - vxz*vzx - 2*vxy*vyz*vzx) / (Mx*My*Mz);
+
+        // Compute the stress-strain constitutive matrix
+        E <<  (1 - vyz*vzy) / (My*Mz*A), (vyz + vzx*vyz) / (My*Mz*A), (vzx + vyz*vzy) / (My*Mz*A), 0, 0, 0,
+              (vxy + vzx*vxz) / (Mz*Mx*A), (1 - vzx*vxz) / (Mz*Mx*A), (vzy + vzx*vxy) / (Mz*Mx*A), 0, 0, 0,
+              (vxz + vxy*vyz) / (Mx*My*A), (vzy + vxz*vyz) / (Mx*My*A), (1 - vxy*vyx) / (Mx*My*A), 0, 0, 0,
+              0, 0, 0, G, 0, 0;
+              0, 0, 0, 0, G, 0;
+              0, 0, 0, 0, 0, G;
     }
     return E;
 }

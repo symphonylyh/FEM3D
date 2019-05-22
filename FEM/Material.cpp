@@ -3,13 +3,13 @@
  * Implementation of the Material class.
  *
  * @author Haohang Huang
- * @date Apr 27, 2018
+ * @date May 21, 2019
  */
 
 #include "Material.h"
 
-Material::Material(const bool & Anisotropy, const bool & Nonlinearity, const bool & NoTension)
-  : anisotropy(Anisotropy), nonlinearity(Nonlinearity), noTension(NoTension), E_(MatrixXd::Zero(4,4)), thermalStrain_(VectorXd::Zero(4))
+Material::Material(const bool & Anisotropy, const bool & Nonlinearity)
+  : anisotropy(Anisotropy), nonlinearity(Nonlinearity), E_(MatrixXd::Zero(6,6)), thermalStrain_(VectorXd::Zero(6))
 {
 }
 
@@ -22,9 +22,14 @@ const double & Material::modulus() const
     return M_;
 }
 
-const double & Material::modulusR() const
+const double & Material::modulusX() const
 {
-    return Mr_;
+    return Mx_;
+}
+
+const double & Material::modulusY() const
+{
+    return My_;
 }
 
 const double & Material::modulusZ() const
@@ -37,35 +42,29 @@ const double & Material::modulusG() const
     return G_;
 }
 
-void Material::adjustModulus(const double & ratio)
-{
-    (void)ratio; // silence warning
-    return;
-}
-
 const MatrixXd & Material::EMatrix() const
 {
     return E_;
 }
 
-VectorXd Material::stressDependentModulus(const VectorXd & stress) const
-{
-    (void)stress; // silence warning
-    return VectorXd::Zero(3); // to silent warning
-}
-
 MatrixXd Material::EMatrix(const VectorXd & modulus) const
 {
     (void)modulus; // silence warning
-    return MatrixXd::Zero(4,4); // to silent warning
+    return MatrixXd::Zero(6,6); // to silent warning
 }
 
-const Vector2d & Material::bodyForce() const
+VectorXd Material::stressDependentModulus(const VectorXd & stress) const
+{
+    (void)stress; // silence warning
+    return VectorXd::Zero(4); // to silent warning
+}
+
+const Vector3d & Material::bodyForce() const
 {
     return bodyForce_;
 }
 
-void Material::setBodyForce(const Vector2d & force)
+void Material::setBodyForce(const Vector3d & force)
 {
     bodyForce_ = force;
 }
