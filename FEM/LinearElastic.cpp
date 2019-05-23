@@ -23,8 +23,8 @@ LinearElastic::LinearElastic(const bool & anisotropy, const bool & nonlinearity,
         E_ << 1 - v, v, v, 0, 0, 0,
               v,   1-v, v, 0, 0, 0,
               v,  v,  1-v, 0, 0, 0,
-              0, 0, 0, (1-2*v)/2, 0, 0;
-              0, 0, 0, 0, (1-2*v)/2, 0;
+              0, 0, 0, (1-2*v)/2, 0, 0,
+              0, 0, 0, 0, (1-2*v)/2, 0,
               0, 0, 0, 0, 0, (1-2*v)/2;
         E_ = E_ * M / (1+v) /(1-2*v);
     }
@@ -50,8 +50,8 @@ LinearElastic::LinearElastic(const bool & anisotropy, const bool & nonlinearity,
         E_ << (1 - vyz*vzy) / (My*Mz*A), (vyz + vzx*vyz) / (My*Mz*A), (vzx + vyz*vzy) / (My*Mz*A), 0, 0, 0,
               (vxy + vzx*vxz) / (Mz*Mx*A), (1 - vzx*vxz) / (Mz*Mx*A), (vzy + vzx*vxy) / (Mz*Mx*A), 0, 0, 0,
               (vxz + vxy*vyz) / (Mx*My*A), (vzy + vxz*vyz) / (Mx*My*A), (1 - vxy*vyx) / (Mx*My*A), 0, 0, 0,
-              0, 0, 0, G, 0, 0;
-              0, 0, 0, 0, G, 0;
+              0, 0, 0, G, 0, 0,
+              0, 0, 0, 0, G, 0,
               0, 0, 0, 0, 0, G;
     }
 

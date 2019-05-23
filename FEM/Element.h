@@ -12,7 +12,7 @@
 #include "Node.h"
 #include "Shape.h"
 #include "Material.h"
-##include "ShapeB20.h"
+#include "ShapeB20.h"
 
 /* Abstract base Element class with shared public methods and pure virtual methods.
  *

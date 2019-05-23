@@ -24,8 +24,8 @@ NonlinearElastic::NonlinearElastic(const bool & anisotropy, const bool & nonline
         E_ << 1 - v, v, v, 0, 0, 0,
               v,   1-v, v, 0, 0, 0,
               v,  v,  1-v, 0, 0, 0,
-              0, 0, 0, (1-2*v)/2, 0, 0;
-              0, 0, 0, 0, (1-2*v)/2, 0;
+              0, 0, 0, (1-2*v)/2, 0, 0,
+              0, 0, 0, 0, (1-2*v)/2, 0,
               0, 0, 0, 0, 0, (1-2*v)/2;
         E_ = E_ * M / (1+v) /(1-2*v);
     }
@@ -51,8 +51,8 @@ NonlinearElastic::NonlinearElastic(const bool & anisotropy, const bool & nonline
         E_ << (1 - vyz*vzy) / (My*Mz*A), (vyz + vzx*vyz) / (My*Mz*A), (vzx + vyz*vzy) / (My*Mz*A), 0, 0, 0,
               (vxy + vzx*vxz) / (Mz*Mx*A), (1 - vzx*vxz) / (Mz*Mx*A), (vzy + vzx*vxy) / (Mz*Mx*A), 0, 0, 0,
               (vxz + vxy*vyz) / (Mx*My*A), (vzy + vxz*vyz) / (Mx*My*A), (1 - vxy*vyx) / (Mx*My*A), 0, 0, 0,
-              0, 0, 0, G, 0, 0;
-              0, 0, 0, 0, G, 0;
+              0, 0, 0, G, 0, 0,
+              0, 0, 0, 0, G, 0,
               0, 0, 0, 0, 0, G;
     }
 
@@ -147,8 +147,8 @@ MatrixXd NonlinearElastic::EMatrix(const VectorXd & modulus) const
         E <<  1 - v, v, v, 0, 0, 0,
               v,   1-v, v, 0, 0, 0,
               v,  v,  1-v, 0, 0, 0,
-              0, 0, 0, (1-2*v)/2, 0, 0;
-              0, 0, 0, 0, (1-2*v)/2, 0;
+              0, 0, 0, (1-2*v)/2, 0, 0,
+              0, 0, 0, 0, (1-2*v)/2, 0,
               0, 0, 0, 0, 0, (1-2*v)/2;
         E = E * modulus(0) / (1+v) /(1-2*v); // for isotropic case, modulus(0) is the constant modulus
     } else {
@@ -170,8 +170,8 @@ MatrixXd NonlinearElastic::EMatrix(const VectorXd & modulus) const
         E <<  (1 - vyz*vzy) / (My*Mz*A), (vyz + vzx*vyz) / (My*Mz*A), (vzx + vyz*vzy) / (My*Mz*A), 0, 0, 0,
               (vxy + vzx*vxz) / (Mz*Mx*A), (1 - vzx*vxz) / (Mz*Mx*A), (vzy + vzx*vxy) / (Mz*Mx*A), 0, 0, 0,
               (vxz + vxy*vyz) / (Mx*My*A), (vzy + vxz*vyz) / (Mx*My*A), (1 - vxy*vyx) / (Mx*My*A), 0, 0, 0,
-              0, 0, 0, G, 0, 0;
-              0, 0, 0, 0, G, 0;
+              0, 0, 0, G, 0, 0,
+              0, 0, 0, 0, G, 0,
               0, 0, 0, 0, 0, G;
     }
     return E;

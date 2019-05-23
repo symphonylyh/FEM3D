@@ -5,3 +5,5 @@ build/
 *.xcodeproj
 *.png
 *.jpg
+main.cpp
+*.vtk

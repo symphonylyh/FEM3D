@@ -32,7 +32,7 @@ class Node
          * @param z The global z-coordinate of the node.
          * @note All pass-by-ref.
          */
-        Node(const int & index, const double & x, const double & y);
+        Node(const int & index, const double & x, const double & y, const double & z);
 
         /**
          * Copy constructor.

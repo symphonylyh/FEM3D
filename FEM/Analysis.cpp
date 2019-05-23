@@ -104,7 +104,7 @@ void Analysis::applyForce()
         const VectorXi & nodeList = curr->getNodeList();
         int elementType = curr->getSize();
         // The shape function for each face in an isoparametric element is the same
-        const std::vector<double> & gaussianPoint = curr->shape()->faceGaussianPt(); // length 9 vector
+        const std::vector<Vector2d> & gaussianPoint = curr->shape()->faceGaussianPt(); // length 9 vector of Vector2d
         const std::vector<double> & gaussianWeight = curr->shape()->faceGaussianWt(); // length 9 vector
         int numGaussianPts = (int)gaussianPoint.size();
 
@@ -132,7 +132,10 @@ void Analysis::applyForce()
             for (int g = 0; g < numGaussianPts; g++) {
                 MatrixXd N = curr->shape()->faceFunctionMat(g); // 3x24 shape matrix
                 MatrixXd globalDeriv = nodeCoord * curr->shape()->faceFunctionDeriv(g); // 3x8 matrix * 8x2 vector = 3x2 matrix [dx/d(xi) dx/d(eta); dy/d(xi) dy/d(eta); dz/d(xi) dz/d(eta)]
-                double jacobianDet = globalDeriv.determinant();
+                Vector3d v1 = globalDeriv.col(0);
+                Vector3d v2 = globalDeriv.col(1);
+                Vector3d v3 = v1.cross(v2);
+                double jacobianDet = v3.norm(); // https://scicomp.stackexchange.com/questions/26886/evaluating-the-surface-integral-in-an-fem-finite-elements-method-procedure
                 result += N.transpose() * load * jacobianDet * gaussianWeight[g]; // 24x1 vector, (Fx,Fy,Fz) at 8 nodes, so 3 * 8 = 24
             }
 
@@ -242,7 +245,7 @@ void Analysis::assembleStiffness()
                 }
 
                 // Second column in local stiffness block (col = 3k + 1, row = 3j & 3j + 1 & 3j + 2)
-                if (boundaryHash.find(3 * nodeList(k)) + 1 != boundaryHash.end()) {
+                if (boundaryHash.find(3 * nodeList(k) + 1) != boundaryHash.end()) {
                     nodalForce(3 * nodeList(j)) -= localStiffness(3 * j, 3 * k + 1) * boundaryHash[3 * nodeList(k) + 1];
                     // only Local(row = 3j + 1, col = 3k + 1) can possibly be at crossing K(3*nodeList(j)+1, 3*nodeList(k)+1).
                     if (j != k) // same as if (3 * nodeList(j) + 1 != 3 * nodeList(k) + 1)
@@ -258,7 +261,7 @@ void Analysis::assembleStiffness()
                 }
 
                 // Third column in local stiffness block (col = 3k + 2, row = 3j & 3j + 1 & 3j + 2)
-                if (boundaryHash.find(3 * nodeList(k)) + 2 != boundaryHash.end()) {
+                if (boundaryHash.find(3 * nodeList(k) + 2) != boundaryHash.end()) {
                     nodalForce(3 * nodeList(j)) -= localStiffness(3 * j, 3 * k + 2) * boundaryHash[3 * nodeList(k) + 2];
                     nodalForce(3 * nodeList(j) + 1) -= localStiffness(3 * j + 1, 3 * k + 2) * boundaryHash[3 * nodeList(k) + 2];
                     // only Local(row = 3j + 2, col = 3k + 2) can possibly be at crossing K(3*nodeList(j)+2, 3*nodeList(k)+2).
@@ -311,7 +314,7 @@ void Analysis::assembleStiffness()
 
     // Free the memory
     std::vector<T>().swap(tripletList);
-    
+
 }
 
 void Analysis::computeStrainAndStress()
@@ -453,7 +456,10 @@ void Analysis::writeToVTK(std::string const & fileName) const
     // size: number of integers in each row. This includes the starting element type, so "+1"
     file << "CELLS " << mesh.elementCount() << " " << (20 + 1) * mesh.elementCount() << "\n";
     for (int i = 0; i < mesh.elementCount(); i++){
-        file << 20 << " " << mesh.elementArray()[i]->getNodeList().transpose() << "\n";
+        VectorXi nodeIndex = mesh.elementArray()[i]->getNodeList();
+        // Note for B20 element, the indexing I am using doesn't conform with VTK format
+        // So we need to exchange the last 4 + 4 = 8 indices
+        file << 20 << " " << nodeIndex.head(12).transpose() << " " << nodeIndex.segment(16, 4).transpose() << " " << nodeIndex.segment(12, 4).transpose() << "\n";
     }
     file << "\n";
 

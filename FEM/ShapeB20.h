@@ -39,7 +39,7 @@ class ShapeB20 : public Shape
 {
     public:
         /* See the documentation of base class Shape. */
-        ShapeB20(const int & nodes, const int & gaussians, const int & edges, const int & edgeNodes, const int & edgeGaussians);
+        ShapeB20(const int & nodes, const int & gaussians, const int & edges, const int & edgeNodes, const int & edgeGaussians, const int & faces, const int & faceNodes, const int & faceGaussians);
         ~ShapeB20();
 
         VectorXd functionVec(const Vector3d & point) const;

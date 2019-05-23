@@ -89,10 +89,10 @@ MatrixXd Element::BMatrix(const Vector3d & point) const
     MatrixXd globalDeriv = (shape()->functionDeriv(point) * nodeCoord_).inverse() * shape()->functionDeriv(point);
 
     // Place into B matrix
-    double Nx = globalDeriv(0, n); // dNi/dx
-    double Ny = globalDeriv(1, n); // dNi/dy
-    double Nz = globalDeriv(2, n); // dNi/dz
     for (int n = 0; n < size_; n++) {
+        double Nx = globalDeriv(0, n); // dNi/dx
+        double Ny = globalDeriv(1, n); // dNi/dy
+        double Nz = globalDeriv(2, n); // dNi/dz
         B(0, 3 * n) =  Nx;
         B(1, 3 * n + 1) = Ny;
         B(2, 3 * n + 2) = Nz;
@@ -190,10 +190,10 @@ MatrixXd Element::_BMatrix(const int & i) const
     MatrixXd globalDeriv = (shape()->functionDeriv(i) * nodeCoord_).inverse() * shape()->functionDeriv(i);
 
     // Place into B matrix
-    double Nx = globalDeriv(0, n); // dNi/dx
-    double Ny = globalDeriv(1, n); // dNi/dy
-    double Nz = globalDeriv(2, n); // dNi/dz
     for (int n = 0; n < size_; n++) {
+        double Nx = globalDeriv(0, n); // dNi/dx
+        double Ny = globalDeriv(1, n); // dNi/dy
+        double Nz = globalDeriv(2, n); // dNi/dz
         B(0, 3 * n) =  Nx;
         B(1, 3 * n + 1) = Ny;
         B(2, 3 * n + 2) = Nz;
