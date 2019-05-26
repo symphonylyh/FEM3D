@@ -132,10 +132,13 @@ void Analysis::applyForce()
             for (int g = 0; g < numGaussianPts; g++) {
                 MatrixXd N = curr->shape()->faceFunctionMat(g); // 3x24 shape matrix
                 MatrixXd globalDeriv = nodeCoord * curr->shape()->faceFunctionDeriv(g); // 3x8 matrix * 8x2 vector = 3x2 matrix [dx/d(xi) dx/d(eta); dy/d(xi) dy/d(eta); dz/d(xi) dz/d(eta)]
+                // Here I got into trouble. The jacobian is not a square matrix so there is no determinant for it.
+                // How to do surface integral? Check these: https://en.wikipedia.org/wiki/Surface_integral & https://scicomp.stackexchange.com/questions/26886/evaluating-the-surface-integral-in-an-fem-finite-elements-method-procedure & https://cloud.tencent.com/developer/article/1082443
+                // |J| = Magnitude (2-norm) of the cross-product vector
                 Vector3d v1 = globalDeriv.col(0);
                 Vector3d v2 = globalDeriv.col(1);
                 Vector3d v3 = v1.cross(v2);
-                double jacobianDet = v3.norm(); // https://scicomp.stackexchange.com/questions/26886/evaluating-the-surface-integral-in-an-fem-finite-elements-method-procedure
+                double jacobianDet = v3.norm();
                 result += N.transpose() * load * jacobianDet * gaussianWeight[g]; // 24x1 vector, (Fx,Fy,Fz) at 8 nodes, so 3 * 8 = 24
             }
 
@@ -456,10 +459,7 @@ void Analysis::writeToVTK(std::string const & fileName) const
     // size: number of integers in each row. This includes the starting element type, so "+1"
     file << "CELLS " << mesh.elementCount() << " " << (20 + 1) * mesh.elementCount() << "\n";
     for (int i = 0; i < mesh.elementCount(); i++){
-        VectorXi nodeIndex = mesh.elementArray()[i]->getNodeList();
-        // Note for B20 element, the indexing I am using doesn't conform with VTK format
-        // So we need to exchange the last 4 + 4 = 8 indices
-        file << 20 << " " << nodeIndex.head(12).transpose() << " " << nodeIndex.segment(16, 4).transpose() << " " << nodeIndex.segment(12, 4).transpose() << "\n";
+        file << 20 << " " << mesh.elementArray()[i]->getNodeList().transpose() << "\n"; // node index conforms with ParaView
     }
     file << "\n";
 

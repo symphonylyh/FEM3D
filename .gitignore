@@ -3,7 +3,11 @@
 **/.DS_Store
 build/
 *.xcodeproj
+.idea/
+.vscode/
 *.png
 *.jpg
 main.cpp
 *.vtk
+*.geo
+test_input.txt

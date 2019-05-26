@@ -68,7 +68,7 @@ auto start = std::chrono::high_resolution_clock::now();
         caseType = new Linear(mesh);
 
     caseType->solve();
-    caseType->printDisp();
+    // caseType->printDisp();
     // caseType->printStrain();
     // caseType->printStress();
     caseType->writeToVTK(outVTKName);

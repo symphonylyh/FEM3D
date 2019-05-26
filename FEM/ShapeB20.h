@@ -11,29 +11,7 @@
 
 #include "Shape.h"
 
-/* Derived class for the shape of isoparametric B20 element. See shape info in ElementB20.cpp.
- * The sketch and index of the B20 element is:
- *
- * z = +1 level:
- * 4 -- 19 -- 7
- * |          |
- * 16         18
- * |          |
- * 5 -- 17 -- 6
- *
- * z = 0 level:
- * 12 ------- 15
- * |          |
- * |          |
- * |          |
- * 13 ------- 14
- *
- * z = -1 level:
- * 0 -- 11 -- 3
- * |          |
- * 8         10
- * |          |
- * 1 -- 9 --  2
+/* Derived class for the shape of isoparametric B20 element. See shape declaration in ElementB20.cpp.
  */
 class ShapeB20 : public Shape
 {

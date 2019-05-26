@@ -12,7 +12,30 @@
 ShapeB20::ShapeB20(const int & nodes, const int & gaussians, const int & edges, const int & edgeNodes, const int & edgeGaussians, const int & faces, const int & faceNodes, const int & faceGaussians) :
     Shape(nodes, gaussians, edges, edgeNodes, edgeGaussians, faces, faceNodes, faceGaussians) // Call the constructor of base class
 {
-    // Set up shape parameters
+    /*
+    * The sketch and index of the B20 element conforms with ParaView format.
+    *
+    * z = +1 level:
+    * 4 -- 15 -- 7
+    * |          |
+    * 12         14
+    * |          |
+    * 5 -- 13 -- 6
+    *
+    * z = 0 level:
+    * 16 ------- 19
+    * |          |
+    * |          |
+    * |          |
+    * 17 ------- 18
+    *
+    * z = -1 level:
+    * 0 -- 11 -- 3
+    * |          |
+    * 8         10
+    * |          |
+    * 1 -- 9 --  2
+    */
     // Local xi-eta-zeta coordinates of nodes
     // Corner nodes
     nodeCoord_[0] << -1, -1, -1;
@@ -28,16 +51,17 @@ ShapeB20::ShapeB20(const int & nodes, const int & gaussians, const int & edges, 
     nodeCoord_[9] << 1, 0, -1;
     nodeCoord_[10] << 0, 1, -1;
     nodeCoord_[11] << -1, 0, -1;
-    nodeCoord_[12] << -1, -1, 0;
-    nodeCoord_[13] << 1, -1, 0;
-    nodeCoord_[14] << 1, 1, 0;
-    nodeCoord_[15] << -1, 1, 0;
-    nodeCoord_[16] << 0, -1, 1;
-    nodeCoord_[17] << 1, 0, 1;
-    nodeCoord_[18] << 0, 1, 1;
-    nodeCoord_[19] << -1, 0, 1;
+    nodeCoord_[12] << 0, -1, 1;
+    nodeCoord_[13] << 1, 0, 1;
+    nodeCoord_[14] << 0, 1, 1;
+    nodeCoord_[15] << -1, 0, 1;
+    nodeCoord_[16] << -1, -1, 0;
+    nodeCoord_[17] << 1, -1, 0;
+    nodeCoord_[18] << 1, 1, 0;
+    nodeCoord_[19] << -1, 1, 0;
 
     // Local xi-eta-zeta coordinates of gaussian points
+    // Ordering of Gaussian points doesn't matter that much, just ensure point & weight match each other
     double temp = std::sqrt(0.6);
     gaussianPt_[0] << -temp, -temp, -temp;
     gaussianPt_[1] << -temp, -temp, 0;
@@ -118,31 +142,31 @@ ShapeB20::ShapeB20(const int & nodes, const int & gaussians, const int & edges, 
 
     // Edge list (see ShapeB20.h, Numbering from bottom up, counter-clockwise, node index should be consistent with the Gaussian weights)
     // Horizontal edges
-    std::vector<int> edge1{0,8,1};
-    std::vector<int> edge2{1,9,2};
-    std::vector<int> edge3{3,10,2};
-    std::vector<int> edge4{0,11,3};
-    std::vector<int> edge5{4,16,5};
-    std::vector<int> edge6{5,17,6};
-    std::vector<int> edge7{7,18,6};
-    std::vector<int> edge8{4,19,7};
+    std::vector<int> edge0{0,8,1};
+    std::vector<int> edge1{1,9,2};
+    std::vector<int> edge2{3,10,2};
+    std::vector<int> edge3{0,11,3};
+    std::vector<int> edge4{4,12,5};
+    std::vector<int> edge5{5,13,6};
+    std::vector<int> edge6{7,14,6};
+    std::vector<int> edge7{4,15,7};
     // Vertical edges
-    std::vector<int> edge9{4,12,0};
-    std::vector<int> edge10{5,13,1};
-    std::vector<int> edge11{6,14,2};
-    std::vector<int> edge12{7,15,3};
-    edgeList_[0] = edge1;
-    edgeList_[1] = edge2;
-    edgeList_[2] = edge3;
-    edgeList_[3] = edge4;
-    edgeList_[4] = edge5;
-    edgeList_[5] = edge6;
-    edgeList_[6] = edge7;
-    edgeList_[7] = edge8;
-    edgeList_[8] = edge9;
-    edgeList_[9] = edge10;
-    edgeList_[10] = edge11;
-    edgeList_[11] = edge12;
+    std::vector<int> edge8{4,16,0};
+    std::vector<int> edge9{5,17,1};
+    std::vector<int> edge10{6,18,2};
+    std::vector<int> edge11{7,19,3};
+    edgeList_[0] = edge0;
+    edgeList_[1] = edge1;
+    edgeList_[2] = edge2;
+    edgeList_[3] = edge3;
+    edgeList_[4] = edge4;
+    edgeList_[5] = edge5;
+    edgeList_[6] = edge6;
+    edgeList_[7] = edge7;
+    edgeList_[8] = edge8;
+    edgeList_[9] = edge9;
+    edgeList_[10] = edge10;
+    edgeList_[11] = edge11;
 
     // Face Gaussian points (for applying face load)
     // 6 -- 7 -- 8
@@ -177,18 +201,18 @@ ShapeB20::ShapeB20(const int & nodes, const int & gaussians, const int & edges, 
     // 7         5
     // |         |
     // 0 -- 4 -- 1
-    std::vector<int> face1{1,2,3,0,9,10,11,8};
-    std::vector<int> face2{5,6,7,4,17,18,19,16};
-    std::vector<int> face3{0,1,5,4,8,13,16,12};
-    std::vector<int> face4{1,2,6,5,9,14,17,13};
-    std::vector<int> face5{2,3,7,6,10,15,18,14};
-    std::vector<int> face6{0,3,7,4,11,15,19,12};
-    faceList_[0] = face1; // bottom
-    faceList_[1] = face2; // top
-    faceList_[2] = face3; // left
-    faceList_[3] = face4; // front
-    faceList_[4] = face5; // right
-    faceList_[5] = face6; // back
+    std::vector<int> face0{1,2,3,0,9,10,11,8};
+    std::vector<int> face1{5,6,7,4,13,14,15,12};
+    std::vector<int> face2{0,1,5,4,8,17,12,16};
+    std::vector<int> face3{1,2,6,5,9,18,13,17};
+    std::vector<int> face4{2,3,7,6,10,19,14,18};
+    std::vector<int> face5{0,3,7,4,11,19,15,16};
+    faceList_[0] = face0; // bottom
+    faceList_[1] = face1; // top
+    faceList_[2] = face2; // left
+    faceList_[3] = face3; // front
+    faceList_[4] = face4; // right
+    faceList_[5] = face5; // back
 
     // After setting up the above parameters, cache the shape function by pre-computing them
     _cacheShape();
@@ -208,15 +232,15 @@ VectorXd ShapeB20::functionVec(const Vector3d & point) const
           // Ni = (1+xi_i*xi)(1+eta_i*eta)(1+zeta_i*zeta)(xi_i*xi+eta_i*eta+zeta_i*zeta-2)/8
           Ni = (1 + nodeCoord_[i](0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) * (nodeCoord_[i](0) * point(0) + nodeCoord_[i](1) * point(1) + nodeCoord_[i](2) * point(2) - 2) / 8;
         }
-        if (i == 8 || i == 10 || i == 16 || i == 18) { // xi = 0 mid-side nodes
+        if (i == 8 || i == 10 || i == 12 || i == 14) { // xi = 0 mid-side nodes
           // Ni = (1-xi^2)(1+eta_i*eta)(1+zeta_i*zeta)/4
           Ni = (1 - point(0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) / 4;
         }
-        if (i == 9 || i == 11 || i == 17 || i == 19) { // eta = 0 mid-side nodes
+        if (i == 9 || i == 11 || i == 13 || i == 15) { // eta = 0 mid-side nodes
           // Ni = (1+xi_i*xi)(1-eta^2)(1+zeta_i*zeta)/4
           Ni = (1 + nodeCoord_[i](0) * point(0)) * (1 - point(1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) / 4;
         }
-        if (i == 12 || i == 13 || i == 14 || i == 15) { // zeta = 0 mid-side nodes
+        if (i == 16 || i == 17 || i == 18 || i == 19) { // zeta = 0 mid-side nodes
           // Ni = (1+xi_i*xi)(1+eta_i*eta)(1-zeta^2)/4
           Ni = (1 + nodeCoord_[i](0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * (1 - point(2) * point(2)) / 4;
         }
@@ -234,15 +258,15 @@ MatrixXd ShapeB20::functionMat(const Vector3d & point) const
           // Ni = (1+xi_i*xi)(1+eta_i*eta)(1+zeta_i*zeta)(xi_i*xi+eta_i*eta+zeta_i*zeta-2)/8
           Ni = (1 + nodeCoord_[i](0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) * (nodeCoord_[i](0) * point(0) + nodeCoord_[i](1) * point(1) + nodeCoord_[i](2) * point(2) - 2) / 8;
         }
-        if (i == 8 || i == 10 || i == 16 || i == 18) { // xi = 0 mid-side nodes
+        if (i == 8 || i == 10 || i == 12 || i == 14) { // xi = 0 mid-side nodes
           // Ni = (1-xi^2)(1+eta_i*eta)(1+zeta_i*zeta)/4
           Ni = (1 - point(0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) / 4;
         }
-        if (i == 9 || i == 11 || i == 17 || i == 19) { // eta = 0 mid-side nodes
+        if (i == 9 || i == 11 || i == 13 || i == 15) { // eta = 0 mid-side nodes
           // Ni = (1+xi_i*xi)(1-eta^2)(1+zeta_i*zeta)/4
           Ni = (1 + nodeCoord_[i](0) * point(0)) * (1 - point(1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) / 4;
         }
-        if (i == 12 || i == 13 || i == 14 || i == 15) { // zeta = 0 mid-side nodes
+        if (i == 16 || i == 17 || i == 18 || i == 19) { // zeta = 0 mid-side nodes
           // Ni = (1+xi_i*xi)(1+eta_i*eta)(1-zeta^2)/4
           Ni = (1 + nodeCoord_[i](0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * (1 - point(2) * point(2)) / 4;
         }
@@ -264,7 +288,7 @@ MatrixXd ShapeB20::functionDeriv(const Vector3d & point) const
         result(1, i) = nodeCoord_[i](1) * (1 + nodeCoord_[i](0) * point(0)) * (1 + nodeCoord_[i](2) * point(2)) * (2 * nodeCoord_[i](1) * point(1) + nodeCoord_[i](0) * point(0) + nodeCoord_[i](2) * point(2) - 1)/ 8;
         result(2, i) = nodeCoord_[i](2) * (1 + nodeCoord_[i](0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * (2 * nodeCoord_[i](2) * point(2) + nodeCoord_[i](0) * point(0) + nodeCoord_[i](1) * point(1) - 1)/ 8;
       }
-      if (i == 8 || i == 10 || i == 16 || i == 18) { // xi = 0 mid-side nodes
+      if (i == 8 || i == 10 || i == 12 || i == 14) { // xi = 0 mid-side nodes
         // d(Ni)/d(xi)=-xi*(1+eta_i*eta)*(1+zeta_i*zeta)/2
         result(0, i) = - point(0) * (1 + nodeCoord_[i](1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) / 2;
         // d(Ni)/d(eta)=(1-xi^2)*eta_i*(1+zeta_i*zeta)/4
@@ -272,7 +296,7 @@ MatrixXd ShapeB20::functionDeriv(const Vector3d & point) const
         // d(Ni)/d(zeta)=(1-xi^2)*(1+eta_i*eta)*zeta_i/4
         result(2, i) = (1 - point(0) * point(0)) * (1 + nodeCoord_[i](1) * point(1)) * nodeCoord_[i](2) / 4;
       }
-      if (i == 9 || i == 11 || i == 17 || i == 19) { // eta = 0 mid-side nodes
+      if (i == 9 || i == 11 || i == 13 || i == 15) { // eta = 0 mid-side nodes
         // d(Ni)/d(xi)=xi_i*(1-eta^2)*(1+zeta_i*zeta)/4
         result(0, i) = nodeCoord_[i](0) * (1 - point(1) * point(1)) * (1 + nodeCoord_[i](2) * point(2)) / 4;
         // d(Ni)/d(eta)=-(1+xi_i*xi)*eta*(1+zeta_i*zeta)/2
@@ -280,7 +304,7 @@ MatrixXd ShapeB20::functionDeriv(const Vector3d & point) const
         // d(Ni)/d(zeta)=(1+xi_i*xi)*(1-eta^2)*zeta_i/4
         result(2, i) = (1 + nodeCoord_[i](0) * point(0)) * (1 - point(1) * point(1)) * nodeCoord_[i](2) / 4;
       }
-      if (i == 12 || i == 13 || i == 14 || i == 15) { // zeta = 0 mid-side nodes
+      if (i == 16 || i == 17 || i == 18 || i == 19) { // zeta = 0 mid-side nodes
         // d(Ni)/d(xi)=xi_i*(1+eta_i*eta)*(1-zeta^2)/4
         result(0, i) = nodeCoord_[i](0) * (1 + nodeCoord_[i](1) * point(1)) * (1 - point(2) * point(2)) / 4;
         // d(Ni)/d(eta)=(1+xi_i*xi)*eta_i*(1-zeta^2)/4
