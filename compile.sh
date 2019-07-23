@@ -8,4 +8,4 @@ cmake ..
 make
 cd ..
 
-./build/FEM/main ./test_input.txt # be careful about the relative path, input/output file are relative to where you call the executable (rather than where the `main` exists)
+./build/FEM/main test_input # be careful about the relative path, input/output file are relative to where you call the executable (rather than where the `main` exists)

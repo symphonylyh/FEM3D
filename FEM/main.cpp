@@ -24,55 +24,61 @@ int main(int argc, char const *argv[]) {
     //--------------------------------------------------------------------------
     //--------------------------------Main program------------------------------
     //--------------------------------------------------------------------------
-    // Designate file name
-    std::string inFileName = "../test_input.txt";
-    std::string outVTKName = "../test_output.vtk";
-    //
-    // std::cout << "Enter the input file name: ";
-    // std::string inFileName;
-    // std::getline(std::cin, inFileName);
-    // inFileName += ".txt";
-    //
-    // std::cout << "Enter the output VTK file name: ";
-    // std::string outFileName;
-    // std::getline(std::cin, outFileName);
-    // std::string outVTKName = outFileName + ".vtk";
-    // outFileName += ".txt";
 
 auto start = std::chrono::high_resolution_clock::now();
 
-    // Command line version
-    // for (int i = 1; i < argc; i++) {
-    //     std::string inFileName(argv[i]);
-    //     Mesh mesh = Mesh(inFileName); // on stack, make sure lifetime of 'mesh' is longer than Analysis case
-    //     Analysis* caseType; // 'case' is a reserved keyword for switch(), so can't declare a variable with name "case"
-    //     if (mesh.nonlinear)
-    //         caseType = new Nonlinear(mesh);
-    //     else
-    //         caseType = new Linear(mesh);
-    //
-    //     caseType->solve();
-    //     caseType->printDisp();
-    //     // caseType->printStrain();
-    //     // caseType->printStress();
-    //     // caseType->writeToVTK(outVTKName);
-    //     delete caseType; caseType = NULL;
-    // }
+bool xcode = true;
+    if (!xcode) {
+        // Command line version
+        for (int i = 1; i < argc; i++) {
+            std::string inFile(argv[i]);
+            std::string inFileName = inFile + ".txt";
+            std::string outVTKName = inFile + ".vtk";
+            Mesh mesh = Mesh(inFileName); // on stack, make sure lifetime of 'mesh' is longer than Analysis case
+            Analysis* caseType; // 'case' is a reserved keyword for switch(), so can't declare a variable with name "case"
+            if (mesh.nonlinear)
+                caseType = new Nonlinear(mesh);
+            else
+                caseType = new Linear(mesh);
 
-    // Xcode version
-    Mesh mesh = Mesh(inFileName);
-    Analysis* caseType;
-    if (mesh.nonlinear)
-        caseType = new Nonlinear(mesh);
-    else
-        caseType = new Linear(mesh);
+            caseType->solve();
+            // caseType->printDisp();
+            // caseType->printStrain();
+            // caseType->printStress();
+            caseType->writeToVTK(outVTKName);
+            delete caseType; caseType = NULL;
+        }
+    } else {
+        // Xcode version
+        // Designate file name
+        std::string inFileName = "../test_input.txt";
+        std::string outVTKName = "../test_output.vtk";
+        //
+        // std::cout << "Enter the input file name: ";
+        // std::string inFileName;
+        // std::getline(std::cin, inFileName);
+        // inFileName += ".txt";
+        //
+        // std::cout << "Enter the output VTK file name: ";
+        // std::string outFileName;
+        // std::getline(std::cin, outFileName);
+        // std::string outVTKName = outFileName + ".vtk";
+        // outFileName += ".txt";
 
-    caseType->solve();
-    // caseType->printDisp();
-    // caseType->printStrain();
-    // caseType->printStress();
-    caseType->writeToVTK(outVTKName);
-    delete caseType; caseType = NULL;
+        Mesh mesh = Mesh(inFileName);
+        Analysis* caseType;
+        if (mesh.nonlinear)
+            caseType = new Nonlinear(mesh);
+        else
+            caseType = new Linear(mesh);
+
+        caseType->solve();
+        // caseType->printDisp();
+        // caseType->printStrain();
+        // caseType->printStress();
+        caseType->writeToVTK(outVTKName);
+        delete caseType; caseType = NULL;
+    }
 
 auto finish = std::chrono::high_resolution_clock::now();
 auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);

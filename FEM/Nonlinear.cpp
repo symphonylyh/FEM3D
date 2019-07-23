@@ -339,6 +339,8 @@ bool Nonlinear::nonlinearIteration(double damping)
 
     }
 
+    std::cout << "Sum of Error Percentage (%): " << sumError / sumModulus * 100 << std::endl;
+
     return (sumError / sumModulus < criteria2 && convergence) ? true : false;
 
 }
